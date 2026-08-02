@@ -1,0 +1,29 @@
+version: '3.8'
+
+services:
+  gitlab:
+    image: 'gitlab/gitlab-ce:latest'
+    restart: always
+    hostname: 'gitlab.local'
+    environment:
+      GITLAB_OMNIBUS_CONFIG: |
+        external_url 'http://popapiska.chlen:8090'
+        gitlab_rails['gitlab_shell_ssh_port'] = 2222
+    ports:
+      - '8090:8090'
+      - '2222:22'
+    volumes:
+      - 'gitlab_config:/etc/gitlab'
+      - 'gitlab_logs:/var/log/gitlab'
+      - 'gitlab_data:/var/opt/gitlab'
+    networks:
+      - gitlab-network
+
+volumes:
+  gitlab_config:
+  gitlab_logs:
+  gitlab_data:
+
+networks:
+  gitlab-network:
+    driver: bridge

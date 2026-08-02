@@ -1,0 +1,38 @@
+stages:
+  - test
+  - build
+  - deploy
+
+variables:
+  DOCKER_IMAGE_BACKEND: beer-backend:latest
+  DOCKER_IMAGE_FRONTEND: beer-frontend:latest
+
+test-backend:
+  stage: test
+  image: node:20-alpine
+  script:
+    - cd app/backend
+    - npm ci
+    - npm run lint || true
+
+test-frontend:
+  stage: test
+  image: node:20-alpine
+  script:
+    - cd app/frontend
+    - npm ci || true
+
+build-job:
+  stage: build
+  script:
+    - echo "Building application images..."
+    - cd app/backend && npm run build
+    - echo "Build completed."
+
+deploy-minikube:
+  stage: deploy
+  script:
+    - echo "Deploying to Minikube..."
+    - kubectl apply -f helm/beer-marketplace/templates/
+  only:
+    - main
