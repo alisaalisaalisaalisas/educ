@@ -6,7 +6,7 @@ metadata:
 spec:
   project: default
   source:
-    repoURL: 'http://gitlab.local:8090/root/beer-marketplace.git'
+    repoURL: 'http://popapiska.chlen:8090/dev/educ.git'
     targetRevision: HEAD
     path: helm/beer-marketplace
   destination:

@@ -12,6 +12,7 @@ test-backend:
   image: node:20-alpine
   script:
     - cd app/backend
+    - npm config set registry https://registry.npmmirror.com
     - npm install --no-audit --no-fund
     - npm run lint || true
 
@@ -20,6 +21,7 @@ test-frontend:
   image: node:20-alpine
   script:
     - cd app/frontend
+    - npm config set registry https://registry.npmmirror.com
     - npm install --no-audit --no-fund || true
 
 build-job:
@@ -28,8 +30,9 @@ build-job:
   script:
     - echo "Building application images..."
     - cd app/backend
+    - npm config set registry https://registry.npmmirror.com
     - npm install --no-audit --no-fund
-    - npx tsc
+    - ./node_modules/.bin/tsc
     - echo "Build completed."
 
 deploy-minikube:

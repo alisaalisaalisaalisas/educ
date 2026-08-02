@@ -19,6 +19,16 @@ services:
     networks:
       - gitlab-network
 
+  argocd:
+    image: quay.io/argoproj/argocd:v2.10.4
+    container_name: argocd-server
+    restart: always
+    command: argocd-server --insecure
+    ports:
+      - '8080:8080'
+    networks:
+      - gitlab-network
+
 volumes:
   gitlab_config:
   gitlab_logs:
