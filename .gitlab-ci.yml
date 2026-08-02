@@ -24,6 +24,7 @@ test-frontend:
 
 build-job:
   stage: build
+  image: node:20-alpine
   script:
     - echo "Building application images..."
     - cd app/backend && npm run build
