@@ -27,7 +27,9 @@ build-job:
   image: node:20-alpine
   script:
     - echo "Building application images..."
-    - cd app/backend && npm run build
+    - cd app/backend
+    - npm ci
+    - npm run build
     - echo "Build completed."
 
 deploy-minikube:
