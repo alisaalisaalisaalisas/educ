@@ -32,8 +32,9 @@ build-job:
 
 deploy-minikube:
   stage: deploy
+  image: alpine/k8s:1.28.2
   script:
-    - echo "Deploying to Minikube..."
+    - echo "Deploying Application + Full Monitoring Stack to Minikube..."
     - kubectl apply -f helm/beer-marketplace/templates/
   only:
     - main
