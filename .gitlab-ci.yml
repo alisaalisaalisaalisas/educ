@@ -12,7 +12,7 @@ test-backend:
   image: node:20-alpine
   script:
     - cd app/backend
-    - npm ci
+    - npm install --no-audit --no-fund
     - npm run lint || true
 
 test-frontend:
@@ -20,7 +20,7 @@ test-frontend:
   image: node:20-alpine
   script:
     - cd app/frontend
-    - npm ci || true
+    - npm install --no-audit --no-fund || true
 
 build-job:
   stage: build
@@ -28,8 +28,8 @@ build-job:
   script:
     - echo "Building application images..."
     - cd app/backend
-    - npm ci
-    - npm run build
+    - npm install --no-audit --no-fund
+    - npx tsc
     - echo "Build completed."
 
 deploy-minikube:
