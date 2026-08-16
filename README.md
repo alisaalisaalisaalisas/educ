@@ -15,10 +15,12 @@
   - [ ] [04. Python для инженера мониторинга и Ops-скриптинга](./01-linux-basics/04-python-for-ops.md)
   - [ ] [05. Linux: Сертификаты, Ядро, Лимиты и Сетевой стек](./01-linux-basics/05-kernel-certificates-networking.md)
   - [ ] [06. Внутреннее устройство ОС: Архитектуры (x86_64 vs ARM), Процессы и Файловые системы](./01-linux-basics/06-os-internals-architecture-fs.md)
+  - [ ] [07. Потоки ввода-вывода (редиректы), $PATH, Пакеты, Синхронизация времени и SSH](./01-linux-basics/07-linux-essential-extras.md)
 - [ ] **[02. Компьютерные сети и Веб-серверы](./02-networking/)**
   - [ ] [01. Основы сетей: OSI, TCP/IP, DNS, HTTP/HTTPS](./02-networking/01-network-fundamentals.md)
   - [ ] [02. Сетевая диагностика (curl, ping, ss, tcpdump, nc)](./02-networking/02-network-diagnostics.md)
   - [ ] [03. Nginx: Reverse Proxy, Балансировка и Траблшутинг](./02-networking/03-nginx-reverse-proxy.md)
+  - [ ] [04. CDN (Cloudflare) и архитектура с Ingress в Kubernetes](./02-networking/04-cdn-and-ingress-architecture.md)
 - [ ] **[03. Системы мониторинга и метрики](./03-monitoring-systems/)**
   - [ ] [01. Концепции мониторинга: Метрики, Push vs Pull, SLA/SLO/SLI](./03-monitoring-systems/01-monitoring-concepts.md)
   - [ ] [02. Prometheus & Grafana: PromQL, Node Exporter, Дашборды](./03-monitoring-systems/02-prometheus-grafana.md)
@@ -32,6 +34,7 @@
   - [ ] [02. Docker Compose: запуск сервисов одной командой](./05-docker-containers/02-docker-compose.md)
   - [ ] [03. Kubernetes: Базовый Траблшутинг (Read-Only для Дежурного)](./05-docker-containers/03-kubernetes-troubleshooting.md)
   - [ ] [04. Ansible: Ad-hoc команды и базовые плейбуки](./05-docker-containers/04-ansible-basics.md)
+  - [ ] [05. Terraform: Основы IaC, HCL, Workflow и State file](./05-docker-containers/05-terraform-basics.md)
 - [ ] **[06. Инцидент-менеджмент и процессы](./06-incident-management/)**
   - [ ] [01. Жизненный цикл инцидента и эскалация](./06-incident-management/01-incident-lifecycle.md)
   - [ ] [02. Runbooks: Решение типовых проблем (502 Bad Gateway, Диск 100%, OOM)](./06-incident-management/02-runbooks-and-cases.md)
