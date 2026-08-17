@@ -1,6 +1,0 @@
-apiVersion: v2
-name: beer-marketplace
-description: Helm chart for Beer Marketplace (Frontend, Backend, K8s Ingress)
-type: application
-version: 0.1.0
-appVersion: "1.0.0"

@@ -1,8 +1,0 @@
-[all]
-localhost ansible_connection=local
-
-[k8s_nodes]
-localhost
-
-[monitoring]
-localhost
