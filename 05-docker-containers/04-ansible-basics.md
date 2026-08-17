@@ -1,111 +1,266 @@
-# 🤖 Модуль 5.4: Ansible: Ad-hoc команды и базовые плейбуки
+# 🤖 Модуль 5.4: Ansible: Ad-hoc, Плейбуки, Роли и Культура автоматизации
 
-**Ansible** — инструмент автоматизации и управления конфигурациями. Он работает **без агентов (Agentless)** — подключается к удаленным серверам по обычному **SSH** и выполняет команды через Python.
+**Ansible** — это инструмент автоматизации и управления конфигурациями (Configuration Management). Он работает по безагентной схеме (**Agentless**): подключается к серверам по стандартному протоколу **SSH** (или WinRM для Windows) и выполняет задачи с помощью модулей Python.
 
 ---
 
-## 1. Файл инвентаря (`hosts.ini`)
+## 🏗️ 1. Архитектура и структура проекта Ansible
 
-В инвентаре описываются серверы и группы, которыми мы управляем:
+```
+ansible-project/
+├── ansible.cfg              # Глобальные настройки (таймауты, пути, ssh-параметры)
+├── inventory/               # Каталог инвентаря
+│   ├── production/
+│   │   ├── hosts.ini        # Список серверов и групп
+│   │   ├── group_vars/      # Переменные групп (web.yml, db.yml, all.yml)
+│   │   └── host_vars/       # Переменные отдельных хостов
+├── playbooks/               # Точки входа сценариев
+│   ├── site.yml             # Главный мастер-плейбук
+│   └── deploy-app.yml
+└── roles/                   # Переиспользуемые роли
+    └── nginx/
+        ├── defaults/main.yml # Переопределяемые дефолтные переменные
+        ├── vars/main.yml     # Жестко зашитые переменные роли
+        ├── tasks/main.yml    # Основной список задач
+        ├── handlers/main.yml # Обработчики событий (триггеры рестарта)
+        ├── templates/        # Jinja2 шаблоны (.j2)
+        ├── files/            # Статические неизменяемые файлы
+        └── meta/main.yml     # Зависимости и метаданные роли
+```
 
+---
+
+## 📋 2. Файл инвентаря (`hosts.ini` и `hosts.yml`)
+
+### Формат INI:
 ```ini
 [webservers]
-web-01 ansible_host=192.168.1.10
-web-02 ansible_host=192.168.1.11
+web-01.prod.lan ansible_host=192.168.1.10
+web-02.prod.lan ansible_host=192.168.1.11
 
 [databases]
-db-01 ansible_host=192.168.1.20
+db-master.prod.lan ansible_host=192.168.1.20 ansible_user=postgres_admin
+
+[production:children]
+webservers
+databases
 
 [all:vars]
 ansible_user=deploy
+ansible_port=22
 ansible_ssh_private_key_file=~/.ssh/id_ed25519
+ansible_python_interpreter=/usr/bin/python3
 ```
 
 ---
 
-## 2. Ad-hoc команды (Главный навык дежурного)
+## ⚡ 3. Ad-hoc команды (Главный навык дежурного)
 
-Ad-hoc команда — это быстрый запуск одноразового действия сразу на десятках серверов без написания сложных файлов.
+Ad-hoc команды позволяют выполнить одно действие сразу на десятках серверов одной строкой:
 
 ```bash
-# 1. Проверить доступность всех хостов по SSH (Модуль ping)
-ansible all -i hosts.ini -m ping
+# 1. Проверить доступность хостов по SSH
+ansible all -i inventory/hosts.ini -m ping
 
-# 2. Проверить Load Average и uptime на всех веб-серверах
-ansible webservers -i hosts.ini -m command -a "uptime"
+# 2. Выполнить команду uptime или df на всех серверах группы
+ansible webservers -i inventory/hosts.ini -m ansible.builtin.command -a "uptime"
+ansible databases -i inventory/hosts.ini -m ansible.builtin.shell -a "df -h /var/lib/postgresql"
 
-# 3. Перезапустить службу Grafana Alloy сразу на всех серверах
-ansible all -i hosts.ini -m systemd -a "name=alloy state=restarted" --become
+# 3. Перезапустить службу с правами root (sudo become)
+ansible webservers -i inventory/hosts.ini -m ansible.builtin.systemd -a "name=nginx state=restarted" --become
 
-# 4. Скопировать обновленный конфигурационный файл на группу серверов
-ansible webservers -i hosts.ini -m copy -a "src=./config.alloy dest=/etc/alloy/config.alloy" --become
+# 4. Проверить статус пакета
+ansible all -i inventory/hosts.ini -m ansible.builtin.package_facts
 
-# 5. Проверить место на диске на серверах баз данных
-ansible databases -i hosts.ini -m shell -a "df -h /var/lib/postgresql"
+# 5. Экстренно скопировать файл на серверы
+ansible webservers -i inventory/hosts.ini -m ansible.builtin.copy -a "src=./hotfix.conf dest=/etc/nginx/conf.d/ mode=0644" --become
 ```
 
-### 🧩 Декодер флагов Ansible (Как легко запомнить):
-
-| Флаг | Полное название | Для чего нужен | Как запомнить (Мнемоника) |
-| :--- | :--- | :--- | :--- |
-| `-i` | `--inventory` | Указывает путь к файлу со списком серверов | **I**nventory (Инвентарь) |
-| `-m` | `--module-name` | Какой модуль запустить (`ping`, `command`, `systemd`, `copy`) | **M**odule (Модуль) |
-| `-a` | `--args` | Параметры/аргументы, которые передаются внутрь модуля | **A**rguments (Аргументы) |
-| `-b` | `--become` | Выполнить команду с правами администратора (`sudo root`) | **B**ecome root (Стать рутом) |
-| `-u` | `--user` | Пользователь SSH для подключения | **U**ser (Пользователь) |
-| `-k` | `--ask-pass` | Спросить пароль SSH (если вход не по ключам) | **K**eyboard password |
-| `-C` | `--check` | Режим симуляции (Dry Run): ничего не менять, только проверить | **C**heck (Проверка) |
-| `-v` / `-vvv` | `--verbose` | Подробный вывод отладки при ошибках | **V**erbose (Многословный) |
+### 🧩 Таблица ключевых флагов Ansible:
+| Флаг | Полное имя | Назначение |
+| :--- | :--- | :--- |
+| `-i` | `--inventory` | Путь к файлу инвентаря или папке. |
+| `-m` | `--module-name` | Название модуля (`ansible.builtin.ping`, `apt`, `systemd`). |
+| `-a` | `--args` | Аргументы, передаваемые внутрь модуля. |
+| `-b` | `--become` | Повышение привилегий до root через `sudo`. |
+| `-C` | `--check` | **Dry-Run (Режим симуляции):** проверить, что изменится, не внося реальных правок. |
+| `-D` | `--diff` | Показать точечный diff (какие строки в конфигах будут заменены). |
+| `-v` / `-vvv` | `--verbose` | Уровень детализации вывода (для траблшутинга SSH и Python). |
 
 ---
 
-## 3. Структура простого Playbook (`deploy-alloy.yml`)
+## 🎨 4. Культура правильного написания Ansible (Best Practices)
 
-Плейбук описывает целевое состояние системы на понятном языке YAML:
+### 1. Фундаментальный принцип: Идемпотентность (Idempotency)
+> **Идемпотентность** означает: выполнение плейбука 1 раз или 100 раз подряд на сервере должно приводить к **одному и тому же результату**, а при повторном запуске неизмененной конфигурации Ansible обязан возвращать `changed=0`.
+
+* ❌ **Антипаттерн (грязный вызов bash, нарушающий идемпотентность):**
+  ```yaml
+  # ПРИ КАЖДОМ запуске статус будет changed=1, даже если пользователь уже есть!
+  - name: Создать пользователя
+    ansible.builtin.shell: useradd deployer
+  ```
+* ✅ **Культурный подход (нативный идемпотентный модуль):**
+  ```yaml
+  - name: Создать системного пользователя deployer
+    ansible.builtin.user:
+      name: deployer
+      state: present
+      uid: 10001
+      shell: /bin/bash
+      create_home: true
+  ```
+
+#### Если модуль `command` или `shell` неизбежен:
+Всегда используйте параметры `creates`, `removes` или `changed_when`:
+```yaml
+- name: Инициализировать кластер PostgreSQL (только если каталог пуст)
+  ansible.builtin.command: /usr/lib/postgresql/16/bin/initdb -D /var/lib/postgresql/data
+  args:
+    creates: /var/lib/postgresql/data/PG_VERSION # Не выполнится, если файл уже есть
+```
+
+---
+
+### 2. Использование FQCN (Fully Qualified Collection Names)
+Начиная с Ansible 2.10, модули вынесены в коллекции. Использование коротких имен (`copy`, `apt`) считается устаревшим стилем. Всегда пишите полное имя:
+* ✅ `ansible.builtin.apt`
+* ✅ `ansible.builtin.template`
+* ✅ `ansible.builtin.systemd`
+* ✅ `community.docker.docker_container`
+* ✅ `ansible.posix.firewalld`
+
+---
+
+### 3. Обработка ошибок: блоки `block`, `rescue`, `always`
+Позволяет реализовать логику отката (Rollback) при возникновении сбоев:
+```yaml
+- name: Развертывание новой версии конфигурации
+  block:
+    - name: Обновить конфиг приложения
+      ansible.builtin.template:
+        src: app.conf.j2
+        dest: /etc/app/app.conf
+        validate: '/usr/bin/app --test-config -f %s'
+
+    - name: Перезапустить сервис
+      ansible.builtin.systemd:
+        name: my-app
+        state: restarted
+
+  rescue:
+    - name: Оповестить дежурного о сбое деплоя
+      ansible.builtin.debug:
+        msg: "Ошибка применения конфига! Выполняем откат на бэкап..."
+
+    - name: Восстановить предыдущую рабочую конфигурацию
+      ansible.builtin.copy:
+        src: /etc/app/app.conf.bak
+        dest: /etc/app/app.conf
+        remote_src: true
+
+  always:
+    - name: Удалить временные файлы деплоя
+      ansible.builtin.file:
+        path: /tmp/deploy-lock
+        state: absent
+```
+
+---
+
+### 4. Безопасность: Секреты и `no_log: true`
+1. **Никогда не храните пароли в открытом виде!** Используйте `ansible-vault`:
+   ```bash
+   # Зашифровать отдельную строку для вставки в плейбук
+   ansible-vault encrypt_string 'MySuperSecretP@ssw0rd' --name 'db_password'
+   ```
+2. **Используйте `no_log: true`** для задач, работающих с чувствительными данными, чтобы токены не попали в логи CI/CD runner:
+   ```yaml
+   - name: Авторизоваться в приватном Docker Registry
+     community.docker.docker_login:
+       registry_url: https://registry.example.com
+       username: "{{ vault_registry_user }}"
+       password: "{{ vault_registry_password }}"
+     no_log: true # Пароль никогда не появится в логах консоли!
+   ```
+
+---
+
+## 🚀 5. Эталонный Production Playbook (`site.yml`)
 
 ```yaml
 ---
-- name: Установка и настройка Grafana Alloy
+- name: Настройка веб-серверов и балансировщика Nginx
   hosts: webservers
   become: true
+  gather_facts: true
+
+  vars:
+    nginx_port: 80
+    app_user: "webapp"
+    app_version: "2.1.0"
 
   tasks:
-    - name: Убедиться, что пакет curl установлен
+    - name: "[System] Обновить кэш apt и установить базовые утилиты"
       ansible.builtin.apt:
-        name: curl
+        name:
+          - curl
+          - htop
+          - ufw
         state: present
-        update_cache: yes
+        update_cache: true
+        cache_valid_time: 3600
 
-    - name: Скопировать конфигурационный файл Alloy
-      ansible.builtin.copy:
-        src: ./config.alloy
-        dest: /etc/alloy/config.alloy
+    - name: "[Nginx] Установить веб-сервер Nginx"
+      ansible.builtin.apt:
+        name: nginx
+        state: present
+
+    - name: "[Nginx] Сгенерировать конфигурационный файл из Jinja2 шаблона"
+      ansible.builtin.template:
+        src: templates/nginx.conf.j2
+        dest: /etc/nginx/sites-available/default
         owner: root
         group: root
         mode: '0644'
-      notify: Перезапустить Alloy
+        validate: '/usr/sbin/nginx -t -c %s'
+      notify: Reload Nginx
 
-    - name: Убедиться, что служба Alloy включена и запущена
+    - name: "[Nginx] Убедиться, что сервис Nginx включен в автозагрузку и запущен"
       ansible.builtin.systemd:
-        name: alloy
+        name: nginx
         state: started
-        enabled: yes
+        enabled: true
 
   handlers:
-    - name: Перезапустить Alloy
+    - name: Reload Nginx
       ansible.builtin.systemd:
-        name: alloy
-        state: restarted
+        name: nginx
+        state: reloaded
 ```
 
-### Запуск плейбука:
+---
+
+## 🔍 6. Линтинг: `ansible-lint`
+
+`ansible-lint` — обязательный инструмент проверки качества кода перед коммитом в Git:
 ```bash
-# Проверка синтаксиса
-ansible-playbook -i hosts.ini deploy-alloy.yml --syntax-check
-
-# Сухой прогон (Dry Run - ничего не меняет, только показывает)
-ansible-playbook -i hosts.ini deploy-alloy.yml --check
-
-# Боевое применение
-ansible-playbook -i hosts.ini deploy-alloy.yml
+# Запуск линтера
+ansible-lint playbooks/site.yml
 ```
+* Проверяет отсутствие устаревших конструкций (`with_items` ➔ `loop`).
+* Требует обязательного наличия `name:` у всех тасок.
+* Проверяет права доступа (`mode: '0644'`) при копировании файлов.
+* Требует использования FQCN.
+
+---
+
+## 🚫 7. Таблица антипаттернов в Ansible
+
+| ❌ Антипаттерн | Почему это плохо | ✅ Как делать правильно |
+| :--- | :--- | :--- |
+| Использование `shell: apt-get install nginx` | Теряется идемпотентность, не работают проверки ошибок. | Использовать модуль `ansible.builtin.apt`. |
+| Таски без понятного имени (`name:`) | В логах отображается безымянный шаг, невозможно понять, где упал плейбук. | Каждой таске давать четкое имя с префиксом `[Component] Действие`. |
+| Хранение паролей в `vars/main.yml` в Git | Компрометация ключей и баз данных. | Шифровать через `ansible-vault`. |
+| Использование `command: systemctl restart nginx` в середине тасок | Nginx будет перезапускаться 5 раз за один прогон, создавая простой пользователям. | Использовать `notify: Restart Nginx` в блоке `handlers`. |
+| Отсутствие флага `validate:` при копировании конфигов | Если в шаблоне синтаксическая ошибка, упадет весь продакшн Nginx. | Добавлять `validate: '/usr/sbin/nginx -t -c %s'`. |
