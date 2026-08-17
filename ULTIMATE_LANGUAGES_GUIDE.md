@@ -4,21 +4,22 @@
 
 ---
 
-# 📑 Содержание
+## 📑 Содержание
 
-1. [Общая Сравнительная Таблица Ментальных Моделей](#0-общая-сравнительная-таблица)
-2. [Язык 1: Python (Змеиный Экспресс)](#1-python)
-3. [Язык 2: Go / Golang (Инженерный Минимализм)](#2-go-golang)
-4. [Язык 3: JavaScript / TypeScript (Хозяин Веба)](#3-javascript--typescript)
-5. [Язык 4: C# / .NET (Корпоративный Танк)](#4-c--net)
-6. [🔥 Сводная шпаргалка: Одна и та же задача на 4 языках](#5-сводная-шпаргалка-одна-задача-на-4-языках)
+1. [0. Общая Сравнительная Таблица Ментальных Моделей](#0-общая-сравнительная-таблица)
+2. [1. 🐍 Python (Змеиный Экспресс)](#1--python)
+3. [2. 🦫 Go / Golang (Инженерный Минимализм)](#2--go-golang)
+4. [3. 🌐 JavaScript / TypeScript (Хозяин Веба)](#3--javascript--typescript)
+5. [4. 🔷 C# / .NET (Корпоративный Танк)](#4--c--net)
+6. [5. 🔥 Сводная шпаргалка: Одна и та же задача на 4 языках](#5--сводная-шпаргалка-одна-задача-на-4-языках)
+7. [🏆 Золотые Правила Выбора Языка в Проектах](#-золотые-правила-выбора-языка-в-проектах)
 
 ---
 
-# 0. Общая Сравнительная Таблица
+## 0. Общая Сравнительная Таблица
 
 | Язык | Философия / Как думать | Типизация | Память | Главное применение |
-|---|---|---|---|---|
+| :--- | :--- | :--- | :--- | :--- |
 | **Python** | *"Пиши как думаешь, быстро прототипируй"* | Динамическая (сильная) | Garbage Collector | Backend (FastAPI/Django), AI/ML, Скрипты, Data Science |
 | **Go** | *"Минимум магии, один способ сделать вещь"* | Статическая (строгая) | Garbage Collector (быстрый) | Высоконагруженный Backend, DevOps утилиты (Docker/K8s), Microservices |
 | **JS / TS** | *"Работает везде, где есть браузер и Node.js"* | Динамическая (JS) / Статическая (TS) | Garbage Collector | Frontend (React/Vue), Fullstack (Node.js/Next.js), Мобилки |
@@ -26,14 +27,15 @@
 
 ---
 
-# 1. 🐍 Python
+## 1. 🐍 Python
 
-### 🧠 Ментальная модель за 30 секунд
-> В Python **нет фигурных скобок `{}` и точек с запятой `;`**. Всё строится на **отступах (4 пробела)**. Всё является объектом. Код читается как английский текст.
+### 🧠 Ментальная модель Python
+
+> В Python нет фигурных скобок и точек с запятой. Всё строится на **отступах (4 пробела)**. Всё является объектом. Код читается как английский текст.
 
 ---
 
-### 1.1 Базовый синтаксис
+### 1.1 Базовый синтаксис Python
 
 ```python
 # 1. Переменные (типы определяются автоматически)
@@ -60,7 +62,7 @@ status = "Доступ открыт" if is_active else "Заблокирован
 
 ---
 
-### 1.2 Коллекции (Списки, Словари, Кортежи, Множества)
+### 1.2 Коллекции в Python (Списки, Словари, Кортежи, Множества)
 
 ```python
 # 1. Список (List - динамический массив)
@@ -86,7 +88,7 @@ squares = [x ** 2 for x in numbers if x % 2 == 0]  # [4, 16] (квадраты �
 
 ---
 
-### 1.3 Циклы и Функции
+### 1.3 Циклы и Функции в Python
 
 ```python
 # 1. Цикл for (итерация по элементам)
@@ -114,7 +116,7 @@ double = lambda x: x * 2
 
 ---
 
-### 1.4 Классы и Датаклассы (Pydantic / dataclass)
+### 1.4 Классы и Датаклассы в Python (Pydantic / dataclass)
 
 ```python
 from dataclasses import dataclass
@@ -137,7 +139,7 @@ print(srv.get_url())  # http://192.168.1.10:8080
 
 ---
 
-### 1.5 Асинхронность и обработка ошибок
+### 1.5 Асинхронность и обработка ошибок в Python
 
 ```python
 import asyncio
@@ -170,7 +172,7 @@ async def main():
 
 ---
 
-### 1.6 Боевой REST API (FastAPI)
+### 1.6 Боевой REST API на Python (FastAPI)
 
 ```python
 # pip install fastapi uvicorn
@@ -214,20 +216,22 @@ pytest                             # Запуск тестов
 ---
 
 ### 💀 Главные грабли новичков в Python
+
 1. **Изменяемые аргументы по умолчанию:** `def add(item, lst=[])` — список `lst` создается **один раз** при старте программы! Используйте `def add(item, lst=None): if lst is None: lst = []`.
 2. **GIL (Global Interpreter Lock):** Для вычислений на CPU используйте `multiprocessing`, а `asyncio`/`threading` — для сетевых и дисковых операций (I/O).
 3. **Забытая активация venv:** Всегда ставьте пакеты внутри активного `.venv`.
 
 ---
 
-# 2. 🦫 Go (Golang)
+## 2. 🦫 Go (Golang)
 
-### 🧠 Ментальная модель за 30 секунд
-> В Go **нет классов и наследования**, **нет исключений (`try/catch`)**, **нет сложной магии**. Есть `struct`, `interface`, простые функции, возврат ошибок `(value, error)` и легковесные потоки — **горутины (`go func()`)** с каналами `chan`. Go компилируется в один автономный бинарник без внешних зависимостей.
+### 🧠 Ментальная модель Go
+
+> В Go **нет классов и наследования**, **нет исключений** `try/catch`, **нет сложной магии**. Есть `struct`, `interface`, простые функции, возврат ошибок `(value, error)` и легковесные потоки — **горутины** `go func()` с каналами `chan`. Go компилируется в один автономный бинарник без внешних зависимостей.
 
 ---
 
-### 2.1 Базовый синтаксис
+### 2.1 Базовый синтаксис Go
 
 ```go
 package main
@@ -264,7 +268,7 @@ func main() {
 
 ---
 
-### 2.2 Коллекции (Срезы / Slices, Мапы / Maps)
+### 2.2 Коллекции в Go (Срезы / Slices, Мапы / Maps)
 
 ```go
 package main
@@ -301,7 +305,7 @@ func main() {
 
 ---
 
-### 2.3 Циклы и Функции
+### 2.3 Циклы и Функции в Go
 
 ```go
 package main
@@ -342,7 +346,7 @@ func Divide(a, b float64) (float64, error) {
 
 ---
 
-### 2.4 Структуры и Интерфейсы
+### 2.4 Структуры и Интерфейсы в Go
 
 ```go
 package main
@@ -373,7 +377,7 @@ func CheckHealth(p Pinger) {
 
 ---
 
-### 2.5 Горутины и Каналы (Суперсила Go)
+### 2.5 Горутины и Каналы в Go (Суперсила Go)
 
 ```go
 package main
@@ -418,7 +422,7 @@ func main() {
 
 ---
 
-### 2.6 Боевой REST API (Стандартный пакет `net/http`)
+### 2.6 Боевой REST API на Go (Стандартный пакет `net/http`)
 
 ```go
 package main
@@ -429,8 +433,8 @@ import (
 )
 
 type HealthResponse struct {
-	Status  string `json:"status"`
-	Uptime  string `json:"uptime"`
+	Status string `json:"status"`
+	Uptime string `json:"uptime"`
 }
 
 type DeployRequest struct {
@@ -488,20 +492,22 @@ go test ./...                      # Запуск всех тестов
 ---
 
 ### 💀 Главные грабли новичков в Go
+
 1. **Игнорирование ошибок:** `val, _ := DoSomething()` — никогда не глушите ошибку через `_` без веской причины. Всегда пишите `if err != nil { return err }`.
 2. **Путаница со значениями и указателями (`*` vs `&`):** Если методу нужно изменить поля структуры, передавайте указатель: `func (s *Server) UpdatePort(p int)`.
 3. **Гонка горутин (Data Race):** Запускайте тесты с флагом `go test -race`.
 
 ---
 
-# 3. 🌐 JavaScript / TypeScript
+## 3. 🌐 JavaScript / TypeScript
 
-### 🧠 Ментальная модель за 30 секунд
+### 🧠 Ментальная модель JavaScript и TypeScript
+
 > JavaScript — язык **однопоточный**, работающий на **Event Loop (цикле событий)**. TypeScript — это JavaScript с **компилятором строгих типов**, который спасает от 90% ошибок `undefined is not a function` еще до запуска кода.
 
 ---
 
-### 3.1 Базовый синтаксис (TypeScript)
+### 3.1 Базовый синтаксис TypeScript
 
 ```typescript
 // 1. Переменные: const (нельзя переназначить) и let (можно)
@@ -533,7 +539,7 @@ const nick = user.profile?.nickname ?? "Аноним";
 
 ---
 
-### 3.2 Функции и Стрелочные функции
+### 3.2 Функции и Стрелочные функции в TypeScript
 
 ```typescript
 // 1. Обычная функция
@@ -558,7 +564,7 @@ const startServer = ({ host, port, timeout = 5000 }: ServerConfig): string => {
 
 ---
 
-### 3.3 Методы Массивов (Главное оружие JS/TS разработчика)
+### 3.3 Методы Массивов в JS/TS (Главное оружие)
 
 ```typescript
 const numbers: number[] = [10, 20, 30, 40, 50];
@@ -581,7 +587,7 @@ const hasHuge = numbers.some(n => n > 40); // true
 
 ---
 
-### 3.4 Типы (Types), Интерфейсы (Interfaces) и Дженерики (Generics)
+### 3.4 Типы, Интерфейсы и Дженерики в TypeScript
 
 ```typescript
 // Type Alias (объединения типов / Union)
@@ -616,7 +622,7 @@ const podResponse: ApiResponse<Pod> = {
 
 ---
 
-### 3.5 Асинхронность: Promises и Async/Await
+### 3.5 Асинхронность: Promises и Async/Await в TS
 
 ```typescript
 // Имитация асинхронного API-запроса
@@ -645,7 +651,7 @@ async function main() {
 
 ---
 
-### 3.6 Боевой REST API (Node.js + Express + TypeScript)
+### 3.6 Боевой REST API на Node.js + Express + TypeScript
 
 ```typescript
 // npm install express
@@ -664,7 +670,7 @@ app.get('/health', (req: Request, res: Response) => {
   res.json({ status: 'ok', timestamp: new Date().toISOString() });
 });
 
-app.post('/deploy', (req: Request<{}, {}, DeployBody>, res: Response) => {
+app.post('/deploy', (req: Request<Record<string, unknown>, unknown, DeployBody>, res: Response) => {
   const { appName, replicas } = req.body;
   if (!appName || replicas < 1) {
     return res.status(400).json({ error: 'Некорректные параметры деплоя' });
@@ -691,20 +697,22 @@ npm run build                      # Запустить скрипт сборк�
 ---
 
 ### 💀 Главные грабли новичков в JS/TS
+
 1. **Нестрогое равенство `==` vs `===`:** Всегда используйте `===` (в JS `0 == ""` — это `true`, а `0 === ""` — `false`).
 2. **Забытый `await`:** Если функция возвращает `Promise`, без `await` вы получите объект Promise вместо результата.
 3. **Мутация массивов:** Методы `.push()`, `.splice()`, `.sort()` мутируют исходный массив! Для React/Redux делайте копию: `[...items].sort()`.
 
 ---
 
-# 4. 🔷 C# / .NET
+## 4. 🔷 C# / .NET
 
-### 🧠 Ментальная модель за 30 секунд
+### 🧠 Ментальная модель C# и .NET
+
 > C# — это современный, супер-производительный строго типизированный язык от Microsoft. Он совмещает мощь компилируемого языка, лаконичный синтаксис (Top-Level statements, Pattern Matching, Records) и надежность экосистемы **.NET Core**.
 
 ---
 
-### 4.1 Базовый синтаксис (C# 12 / .NET 8)
+### 4.1 Базовый синтаксис C# (.NET 8)
 
 ```csharp
 // В современном C# не нужно писать class Program и static void Main!
@@ -742,7 +750,7 @@ string healthMessage = isHealthy switch
 
 ---
 
-### 4.2 Коллекции (Списки `List<T>`, Словари `Dictionary<TKey, TValue>`)
+### 4.2 Коллекции в C# (Списки `List<T>`, Словари `Dictionary<TKey, TValue>`)
 
 ```csharp
 // 1. Список (List)
@@ -767,7 +775,7 @@ if (nodeCapacity.TryGetValue("node-beta", out int ram))
 
 ---
 
-### 4.3 LINQ (Супер-оружие C# для работы с данными)
+### 4.3 LINQ в C# (Супер-оружие для работы с данными)
 
 ```csharp
 // LINQ позволяет фильтровать и преобразовывать коллекции в стиле SQL:
@@ -787,7 +795,7 @@ bool hasLarge = numbers.Any(n => n > 8); // true
 
 ---
 
-### 4.4 Записи (Records), Классы и Nullable Reference Types
+### 4.4 Записи (Records), Классы и Nullable Reference Types в C#
 
 ```csharp
 // Record — неизменяемый класс в одну строку с автоматическим Equals, HashCode и ToString!
@@ -818,7 +826,7 @@ public class ClusterNode
 
 ---
 
-### 4.5 Асинхронность (async / await и Tasks)
+### 4.5 Асинхронность в C# (async / await и Tasks)
 
 ```csharp
 using System.Net.Http.Json;
@@ -856,7 +864,7 @@ public class MetricService
 
 ---
 
-### 4.6 Боевой REST API (C# .NET Minimal APIs)
+### 4.6 Боевой REST API на C# (.NET Minimal APIs)
 
 ```csharp
 // Создается командой: dotnet new web -n DevOpsApi
@@ -904,25 +912,26 @@ dotnet publish -c Release -o ./out # Опубликовать проект дл�
 ---
 
 ### 💀 Главные грабли новичков в C#
+
 1. **Блокировка асинхронного кода (`.Result` или `.Wait()`):** Никогда не пишите `task.Result` внутри контроллеров — это приводит к Deadlock (взаимной блокировке потоков). Всегда используйте `await`.
 2. **`IDisposable` и `using`:** Объекты, работающие с сетевыми соединениями или файлами (`StreamReader`, `SqlConnection`), всегда оборачивайте в `using var resource = ...;` для гарантированного освобождения памяти.
 3. **NullReferenceException:** Включите `<Nullable>enable</Nullable>` в `.csproj`, чтобы компилятор бил по рукам за возможный `null`.
 
 ---
 
-# 5. 🔥 Сводная шпаргалка: Одна задача на 4 языках
+## 5. 🔥 Сводная шпаргалка: Одна задача на 4 языках
 
-### 🎯 Задача: 
+### 🎯 Задача
 Взять список чисел, отфильтровать только четные, возвести в квадрат и посчитать их сумму.
 
-### 🐍 Python
+### 🐍 Python: Решение задачи
 ```python
 numbers = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10]
 total = sum(x**2 for x in numbers if x % 2 == 0)
 print(total) # 220
 ```
 
-### 🦫 Go
+### 🦫 Go: Решение задачи
 ```go
 package main
 import "fmt"
@@ -939,7 +948,7 @@ func main() {
 }
 ```
 
-### 🌐 TypeScript
+### 🌐 TypeScript: Решение задачи
 ```typescript
 const numbers: number[] = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10];
 const total = numbers
@@ -950,7 +959,7 @@ const total = numbers
 console.log(total); // 220
 ```
 
-### 🔷 C#
+### 🔷 C#: Решение задачи
 ```csharp
 using System;
 using System.Linq;
@@ -966,7 +975,7 @@ Console.WriteLine(total); // 220
 
 ---
 
-# 🏆 Золотые Правила Выбора Языка в Проектах:
+## 🏆 Золотые Правила Выбора Языка в Проектах
 
 1. **Пишите на Python**, если нужно: быстро проверить гипотезу, написать парсер/скрипт автоматизации, обучить ML-модель, сделать прототип API на FastAPI.
 2. **Пишите на Go**, если нужно: сделать высокопроизводительный сетевой сервис, CLI-утилиту, DevOps/SRE инструмент или микросервис, который потребляет 15 Мб RAM и держит 50 000 RPS.
