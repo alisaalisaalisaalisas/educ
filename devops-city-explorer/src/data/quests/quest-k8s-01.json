@@ -1,0 +1,43 @@
+{
+  "id": "quest-k8s-01",
+  "zone": "k8s-core",
+  "title": "CrashLoopBackOff: Расследование",
+  "category": "Kubernetes",
+  "difficulty": "Medium",
+  "reward": {
+    "slaBonus": 0.08,
+    "credits": 250,
+    "badge": "K8s Troubleshooter L1"
+  },
+  "npc": "elena",
+  "dialogue": {
+    "avatar": "elena",
+    "name": "Security Auditor Елена",
+    "lines": [
+      "У нас критическая ситуация.",
+      "Под payment-service в namespace production не может стартовать.",
+      "Статус: CrashLoopBackOff. Уже 47 рестартов.",
+      "Нужно найти причину и исправить манифест. Быстро."
+    ]
+  },
+  "document": {
+    "title": "Траблшутинг CrashLoopBackOff в Kubernetes",
+    "theory": "### Алгоритм расследования CrashLoopBackOff\n\n1. `kubectl describe pod <name>` — проверить Events и причину рестарта\n2. `kubectl logs <name> --previous` — посмотреть логи предыдущего падения\n3. Частые причины:\n   - Отсутствующий ConfigMap/Secret\n   - Неправильный порт или команда запуска\n   - OOM Kill (нехватка памяти)\n   - Зависимость от недоступного сервиса\n4. Исправить манифест и применить: `kubectl apply -f deployment.yaml`"
+  },
+  "challenge": {
+    "type": "code-fix",
+    "language": "yaml",
+    "initialCode": "apiVersion: apps/v1\nkind: Deployment\nmetadata:\n  name: payment-service\nspec:\n  replicas: 2\n  selector:\n    matchLabels:\n      app: payment\n  template:\n    metadata:\n      labels:\n        app: payment\n    spec:\n      containers:\n      - name: payment\n        image: myregistry/payment:v2.1\n        ports:\n        - containerPort: 8080\n        env:\n        - name: DB_PASSWORD\n          valueFrom:\n            secretKeyRef:\n              name: db-credentials\n              key: password\n        - name: CONFIG_PATH\n          value: /etc/config/app.yaml\n        volumeMounts:\n        - name: config-vol\n          mountPath: /etc/config",
+    "validation": [
+      { "pattern": "volumes:", "message": "Нужно добавить секцию volumes для определения config-vol" },
+      { "pattern": "configMap:", "message": "Volume должен ссылаться на ConfigMap" },
+      { "pattern": "name:\\s*payment-config", "message": "ConfigMap должен называться payment-config" }
+    ],
+    "hints": [
+      "В манифесте есть volumeMount, но нет определения самого volume",
+      "Добавьте секцию `volumes:` на уровне `spec:` пода",
+      "Volume типа configMap должен ссылаться на существующий ConfigMap"
+    ],
+    "solutionExample": "apiVersion: apps/v1\nkind: Deployment\nmetadata:\n  name: payment-service\nspec:\n  replicas: 2\n  selector:\n    matchLabels:\n      app: payment\n  template:\n    metadata:\n      labels:\n        app: payment\n    spec:\n      containers:\n      - name: payment\n        image: myregistry/payment:v2.1\n        ports:\n        - containerPort: 8080\n        env:\n        - name: DB_PASSWORD\n          valueFrom:\n            secretKeyRef:\n              name: db-credentials\n              key: password\n        - name: CONFIG_PATH\n          value: /etc/config/app.yaml\n        volumeMounts:\n        - name: config-vol\n          mountPath: /etc/config\n      volumes:\n      - name: config-vol\n        configMap:\n          name: payment-config"
+  }
+}

@@ -1,0 +1,41 @@
+{
+  "id": "quest-linux-01",
+  "zone": "linux-suburbs",
+  "title": "Найди утечку ресурсов",
+  "category": "Linux",
+  "difficulty": "Easy",
+  "reward": {
+    "slaBonus": 0.03,
+    "credits": 100,
+    "badge": "Resource Hunter L1"
+  },
+  "npc": "boris",
+  "dialogue": {
+    "avatar": "boris",
+    "name": "Сисадмин Борис",
+    "lines": [
+      "Эх, молодёжь... Опять сервер тормозит.",
+      "Load Average улетел в космос, а никто не может найти причину.",
+      "Вот тебе терминал — найди процесс, который жрёт всю память.",
+      "В моё время мы это делали с закрытыми глазами!"
+    ]
+  },
+  "document": {
+    "title": "Диагностика ресурсов Linux",
+    "theory": "### Команды диагностики\n\n- `top` / `htop` — мониторинг процессов в реальном времени\n- `ps aux --sort=-%mem` — список процессов, отсортированных по памяти\n- `free -h` — использование оперативной памяти\n- `df -h` — использование дискового пространства\n- `uptime` — Load Average (1, 5, 15 минут)\n\n**Правило:** Load Average не должен превышать количество ядер CPU."
+  },
+  "challenge": {
+    "type": "terminal",
+    "language": "bash",
+    "initialCode": "# Сервер тормозит! Load Average: 12.5 на 4-ядерной машине.\n# Найди процесс, потребляющий больше всего памяти,\n# и запиши команду для его корректной остановки.\n\n# Напиши команду для поиска процесса:\n\n\n# Напиши команду для остановки процесса (PID 4281):\n",
+    "validation": [
+      { "pattern": "ps\\s+aux.*--sort.*mem|top|htop", "message": "Используйте ps aux --sort=-%mem или top/htop для поиска процесса" },
+      { "pattern": "kill\\s+(-15\\s+)?4281|kill\\s+-TERM\\s+4281", "message": "Используйте kill -15 (SIGTERM) для корректной остановки" }
+    ],
+    "hints": [
+      "Попробуйте `ps aux --sort=-%mem | head`",
+      "Для корректной остановки используйте `kill -15 PID` (SIGTERM), а не kill -9"
+    ],
+    "solutionExample": "ps aux --sort=-%mem | head\nkill -15 4281"
+  }
+}

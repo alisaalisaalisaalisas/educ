@@ -1,0 +1,43 @@
+{
+  "id": "quest-docker-01",
+  "zone": "docker-yard",
+  "title": "Оптимизация гигантского Dockerfile",
+  "category": "Containers",
+  "difficulty": "Easy",
+  "reward": {
+    "slaBonus": 0.05,
+    "credits": 150,
+    "badge": "Container Optimizer L1"
+  },
+  "npc": "vasya",
+  "dialogue": {
+    "avatar": "vasya",
+    "name": "Junior Dev Вася",
+    "lines": [
+      "Ой, привет! Слушай, у меня проблема...",
+      "Мой Docker-образ весит 1.8 Гб, и деплой идёт 20 минут!",
+      "Шеф сказал использовать multi-stage сборку, но я не понимаю как...",
+      "Можешь помочь переписать мой Dockerfile?"
+    ]
+  },
+  "document": {
+    "title": "Dockerfile Best Practices: Multi-stage Builds",
+    "theory": "### Multi-stage сборка\n\nИспользуйте временный этап `builder` для компиляции и финальный чистый образ на базе `alpine` для рантайма.\n\n**Ключевые принципы:**\n- Разделяйте этапы сборки и исполнения\n- Используйте лёгкие базовые образы (alpine, scratch, distroless)\n- Копируйте только необходимые артефакты через `COPY --from=builder`\n- Не забывайте очищать кэш пакетного менеджера"
+  },
+  "challenge": {
+    "type": "code-fix",
+    "language": "dockerfile",
+    "initialCode": "FROM golang:1.22\nWORKDIR /app\nCOPY . .\nRUN go build -o server .\nCMD [\"./server\"]",
+    "validation": [
+      { "pattern": "FROM\\s+golang:.*\\s+AS\\s+builder", "message": "Используйте именованный этап сборки (AS builder)" },
+      { "pattern": "FROM\\s+(alpine|scratch|gcr\\.io/distroless)", "message": "Финальный образ должен быть на alpine/scratch/distroless" },
+      { "pattern": "COPY\\s+--from=builder", "message": "Скопируйте бинарник из этапа builder" }
+    ],
+    "hints": [
+      "Добавьте `AS builder` в первую строку FROM",
+      "Второй блок начните с `FROM alpine:latest`",
+      "Используйте `COPY --from=builder /app/server /server`"
+    ],
+    "solutionExample": "FROM golang:1.22 AS builder\nWORKDIR /app\nCOPY . .\nRUN go build -o server .\n\nFROM alpine:latest\nCOPY --from=builder /app/server /server\nCMD [\"/server\"]"
+  }
+}
