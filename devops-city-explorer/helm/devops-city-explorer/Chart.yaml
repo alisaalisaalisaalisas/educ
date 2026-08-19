@@ -1,0 +1,15 @@
+apiVersion: v2
+name: devops-city-explorer
+description: Production-ready Helm chart for DevOps City Explorer (2D Interactive Learning Platform)
+type: application
+version: 1.0.0
+appVersion: "2.0.0"
+keywords:
+  - devops
+  - education
+  - phaser3
+  - react
+  - game
+maintainers:
+  - name: DevOps Engineering Team
+    email: ops@devopscity.internal

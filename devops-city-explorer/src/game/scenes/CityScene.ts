@@ -354,17 +354,32 @@ export class CityScene extends Phaser.Scene {
     // Vasya at Docker Yard (North-West)
     addInteractive(8 * 32, 5 * 32, 'npc', 'vasya', 'npc-vasya', 'docker-yard', 'Вася [Dev]', '#4ade80');
 
-    // Elena at K8s Core (North-Center)
-    addInteractive(20 * 32, 4 * 32, 'npc', 'elena', 'npc-elena', 'k8s-core', 'Елена [SRE]', '#38bdf8');
-
     // Boris at Linux Suburbs (South-West)
     addInteractive(8 * 32, 22 * 32, 'npc', 'boris', 'npc-boris', 'linux-suburbs', 'Борис [Sys]', '#f59e0b');
 
-    // Linux Diagnostics Terminal
-    addInteractive(11 * 32, 22 * 32, 'terminal', 'term-linux', 'term-icon', 'linux-suburbs', 'Linux CLI', '#22c55e');
+    // Matvey at Git Bridge (Center River Crossing)
+    addInteractive(20 * 32, 14 * 32, 'npc', 'matvey', 'npc-matvey', 'git-bridge', 'Матвей [Git]', '#f59e0b');
 
-    // K8s Cluster Terminal
+    // Daria at Network Crossroads (South-East)
+    addInteractive(30 * 32, 24 * 32, 'npc', 'daria', 'npc-daria', 'network-crossroads', 'Дарья [NetOps]', '#ec4899');
+
+    // Elena at K8s Core (North-Center)
+    addInteractive(20 * 32, 4 * 32, 'npc', 'elena', 'npc-elena', 'k8s-core', 'Елена [SRE]', '#38bdf8');
+
+    // Igor at Observability Peak (North-East)
+    addInteractive(33 * 32, 4 * 32, 'npc', 'igor', 'npc-igor', 'observability-peak', 'Игорь [Obs]', '#a855f7');
+
+    // Artem at Cloud Valley & IaC (Mid-East)
+    addInteractive(35 * 32, 10 * 32, 'npc', 'artem', 'npc-artem', 'cloud-valley', 'Артём [IaC/Cloud]', '#38bdf8');
+
+    // Siren / Incident Dispatcher at War Room
+    addInteractive(33 * 32, 7 * 32, 'npc', 'siren', 'npc-siren', 'incident-war-room', '🚨 Сирена [WarRoom]', '#ef4444');
+
+    // Terminals
+    addInteractive(11 * 32, 22 * 32, 'terminal', 'term-linux', 'term-icon', 'linux-suburbs', 'Linux CLI', '#22c55e');
     addInteractive(20 * 32, 3 * 32, 'terminal', 'term-k8s', 'term-icon', 'k8s-core', 'K8s Core', '#a855f7');
+    addInteractive(30 * 32, 23 * 32, 'terminal', 'term-net', 'term-icon', 'network-crossroads', 'NetOps Kiosk', '#ec4899');
+    addInteractive(35 * 32, 12 * 32, 'terminal', 'term-cloud', 'term-icon', 'cloud-valley', 'Cloud IaC Console', '#38bdf8');
   }
 
   update() {
@@ -448,25 +463,25 @@ export class CityScene extends Phaser.Scene {
       const wx = (i * 140 + this.time.now * 0.025) % westWidth;
       const wy = 13 * 32 + 8 + (i % 3) * 26;
       if (wx + 24 < bridgeLeft - 4) {
-        this.waterShimmer.fillRoundedRect(wx, wy, 24, 3, 1);
+        this.waterShimmer.fillRoundedRect(wx, wy, 24, 3, 1.5);
       }
     }
 
-    // 3. East River flowing waves (x: 750 .. 1270px)
-    const eastStartX = bridgeRight + 12; // 748px
-    const eastWidth = 1280 - eastStartX - 10; // ~522px
+    // 3. East River flowing waves (x: 746 .. 1270px)
+    const eastStartX = bridgeRight + 10;
+    const eastWidth = 1280 - eastStartX - 10;
     for (let i = 0; i < 4; i++) {
-      const wx = eastStartX + ((i * 140 + this.time.now * 0.025) % eastWidth);
-      const wy = 13 * 32 + 8 + ((i + 1) % 3) * 26;
-      if (wx > bridgeRight + 6 && wx + 24 < 1275) {
-        this.waterShimmer.fillRoundedRect(wx, wy, 24, 3, 1);
+      const ex = eastStartX + ((i * 140 + this.time.now * 0.025) % eastWidth);
+      const ey = 13 * 32 + 8 + ((i + 1) % 3) * 26;
+      if (ex + 24 < 1270) {
+        this.waterShimmer.fillRoundedRect(ex, ey, 24, 3, 1.5);
       }
     }
   }
 
   private drawObjectiveBeacon() {
     this.questBeacon.clear();
-    const time = this.time.now * 0.004;
+    const time = this.time.now * 0.005;
     const pulseRadius = 18 + Math.sin(time) * 4;
 
     const state = gameState.get();
@@ -476,8 +491,18 @@ export class CityScene extends Phaser.Scene {
       targetObj = this.interactibles.find(i => i.id === 'vasya');
     } else if (state.questProgress['quest-linux-01']?.status !== 'completed') {
       targetObj = this.interactibles.find(i => i.id === 'boris');
+    } else if (state.questProgress['quest-git-01']?.status !== 'completed') {
+      targetObj = this.interactibles.find(i => i.id === 'matvey');
+    } else if (state.questProgress['quest-network-01']?.status !== 'completed') {
+      targetObj = this.interactibles.find(i => i.id === 'daria');
     } else if (state.questProgress['quest-k8s-01']?.status !== 'completed' && state.unlockedZones.includes('k8s-core')) {
       targetObj = this.interactibles.find(i => i.id === 'elena');
+    } else if (state.questProgress['quest-obs-01']?.status !== 'completed' && state.unlockedZones.includes('observability-peak')) {
+      targetObj = this.interactibles.find(i => i.id === 'igor');
+    } else if (state.questProgress['quest-terraform-01']?.status !== 'completed' && state.unlockedZones.includes('cloud-valley')) {
+      targetObj = this.interactibles.find(i => i.id === 'artem');
+    } else if (state.questProgress['quest-warroom-01']?.status !== 'completed' && state.unlockedZones.includes('incident-war-room')) {
+      targetObj = this.interactibles.find(i => i.id === 'siren');
     }
 
     if (targetObj) {
@@ -507,6 +532,7 @@ export class CityScene extends Phaser.Scene {
     if (ty <= 12) {
       if (tx <= 15) return 'docker-yard';
       if (tx >= 16 && tx <= 24 && ty <= 7) return 'k8s-core';
+      if (tx >= 28 && ty >= 8) return 'cloud-valley';
       if (tx >= 26) return 'observability-peak';
       return 'docker-yard';
     }

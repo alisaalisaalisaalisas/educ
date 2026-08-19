@@ -1,0 +1,51 @@
+{
+  "id": "quest-git-01",
+  "zone": "git-bridge",
+  "title": "Настройка надежного GitHub Actions CI/CD пайплайна",
+  "category": "CI/CD & Git",
+  "difficulty": "Medium",
+  "reward": {
+    "slaBonus": 0.05,
+    "credits": 250,
+    "badge": "CI/CD Architect L1"
+  },
+  "dialogue": {
+    "avatar": "matvey",
+    "name": "Матвей (Git/CI Guru)",
+    "lines": [
+      "Привет! У нас на мосту Git Bridge настоящая авария!",
+      "Параллельные пуши в ветку main запускают дублирующие деплои, которые затирают друг друга в кластере.",
+      "А ещё наши тесты идут по 15 минут, потому что кэш зависимостей не настроен!",
+      "Помоги исправить наш .github/workflows/deploy.yml: настрой concurrency-группу и правильный триггер на ветку main!"
+    ]
+  },
+  "document": {
+    "title": "GitHub Actions Best Practices for Production",
+    "theory": "### Контроль параллелизма и кэширование в CI/CD:\n- **`concurrency`:** Предотвращает состояние гонки (Race Condition), когда два одновременных коммита пытаются выкатить разные версии в один неймспейс. Параметр `cancel-in-progress: true` автоматически отменяет устаревший билд при поступлении нового коммита.\n- **Триггеры `on: push: branches:`:** Ограничивают автодеплой только стабильными релизными ветками (`main` / `master`).\n- **Кэширование зависимостей:** Ускоряет сборку в 5–10 раз за счет сохранения директории `~/.npm` или `.m2/repository` между запусками раннера."
+  },
+  "challenge": {
+    "type": "monaco-patch",
+    "language": "yaml",
+    "initialCode": "name: Deploy Application\n\non:\n  push:\n    branches:\n      - '*'\n\njobs:\n  deploy:\n    runs-on: ubuntu-latest\n    steps:\n      - name: Checkout code\n        uses: actions/checkout@v4\n\n      - name: Run Tests\n        run: npm test\n\n      - name: Deploy to K8s\n        run: kubectl apply -f k8s/\n",
+    "validation": [
+      {
+        "pattern": "concurrency:\\s*\\n\\s*group:\\s*.+\\n\\s*cancel-in-progress:\\s*true",
+        "message": "Добавьте блок 'concurrency' с 'group' и 'cancel-in-progress: true'"
+      },
+      {
+        "pattern": "branches:\\s*\\n\\s*-\\s*(main|master)",
+        "message": "Ограничьте триггер push только веткой 'main' (или 'master')"
+      },
+      {
+        "pattern": "uses:\\s*actions/setup-node",
+        "message": "Добавьте шаг 'actions/setup-node' с кэшированием npm (cache: 'npm')"
+      }
+    ],
+    "hints": [
+      "Добавьте на верхнем уровне: concurrency:\\n  group: production_deploy\\n  cancel-in-progress: true",
+      "Замените ветку '*' на '- main'",
+      "Добавьте шаг: - uses: actions/setup-node@v4\\n  with:\\n    node-version: 20\\n    cache: 'npm'"
+    ],
+    "solutionExample": "name: Deploy Application\n\non:\n  push:\n    branches:\n      - main\n\nconcurrency:\n  group: production_deploy\n  cancel-in-progress: true\n\njobs:\n  deploy:\n    runs-on: ubuntu-latest\n    steps:\n      - name: Checkout code\n        uses: actions/checkout@v4\n\n      - name: Setup Node with cache\n        uses: actions/setup-node@v4\n        with:\n          node-version: 20\n          cache: 'npm'\n\n      - name: Run Tests\n        run: npm test\n\n      - name: Deploy to K8s\n        run: kubectl apply -f k8s/\n"
+  }
+}

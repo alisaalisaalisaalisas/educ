@@ -1,0 +1,63 @@
+name: Build and Deploy DevOps City Explorer
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+    branches:
+      - main
+
+# Concurrency control: cancel previous runs on new push
+concurrency:
+  group: deploy-game-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: write
+  pages: write
+  id-token: write
+
+jobs:
+  lint-and-build:
+    name: 🔍 Validate & Build Game Bundle
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: 📥 Checkout repository
+        uses: actions/checkout@v4
+
+      - name: 🟢 Setup Node.js with caching
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: 'npm'
+          cache-dependency-path: devops-city-explorer/package-lock.json
+
+      - name: 📦 Install dependencies
+        working-directory: devops-city-explorer
+        run: npm ci
+
+      - name: 🏗️ Compile TypeScript & Vite Bundle
+        working-directory: devops-city-explorer
+        run: npm run build
+
+      - name: 📤 Upload Pages artifact
+        if: github.ref == 'refs/heads/main'
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: devops-city-explorer/dist
+
+  deploy:
+    name: 🚀 Deploy to GitHub Pages
+    if: github.ref == 'refs/heads/main'
+    needs: lint-and-build
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+
+    steps:
+      - name: 🌐 Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v4

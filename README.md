@@ -42,6 +42,7 @@
 - [ ] **[07. Подготовка к собеседованиям и Pet-проект](./07-interview-prep/)**
   - [ ] [01. Топ вопросов и кейсов на собеседовании](./07-interview-prep/01-top-interview-questions.md)
   - [ ] [02. Домашний лабораторный стенд (Pet-project в резюме)](./07-interview-prep/02-pet-project-guide.md)
+  - [ ] [03. Экспресс-подготовка: Troubleshooting, Флаги утилит, Zabbix и ELK](./07-interview-prep/03-quick-interview-cheat-sheet.md)
 
 ---
 

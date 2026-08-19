@@ -1,0 +1,44 @@
+{
+  "id": "quest-terraform-01",
+  "zone": "cloud-valley",
+  "title": "Устранение дрифта и защита Terraform State",
+  "category": "Cloud & IaC",
+  "difficulty": "Medium",
+  "reward": {
+    "slaBonus": 0.05,
+    "credits": 200,
+    "badge": "Terraform Architect L1"
+  },
+  "npc": "artem",
+  "dialogue": {
+    "avatar": "artem",
+    "name": "Cloud Архитектор Артём",
+    "lines": [
+      "Приветствую в Cloud Valley!",
+      "Кто-то из разработчиков вручную менял ресурсы в AWS через консоль, и теперь terraform apply падает с ошибками.",
+      "Кроме того, состояние хранилось локально на ноутбуке без шифрования и блокировки!",
+      "Помоги переписать манифест: подключи безопасный S3 backend с шифрованием и добавь блокировку через DynamoDB."
+    ]
+  },
+  "document": {
+    "title": "Terraform Best Practices: Remote State & Locking",
+    "theory": "### Управление State в Terraform\n\nНикогда не храните `terraform.tfstate` локально или в Git-репозитории!\n\n**Best Practices:**\n1. **Remote Backend (S3/GCS):** централизованное общее хранилище стейта.\n2. **State Locking (DynamoDB):** предотвращает одновременный запуск двух деплоев (race condition).\n3. **Encryption (AES256):** шифрование данных стейта в покое (`encrypt = true`), так как стейт может содержать пароли и секреты.\n4. **Versioning:** включенное версионирование бакета для отката при повреждении файла стейта."
+  },
+  "challenge": {
+    "type": "code-fix",
+    "language": "hcl",
+    "initialCode": "terraform {\n  required_version = \">= 1.5.0\"\n  \n  # TODO: Настройте S3 backend с блокировкой DynamoDB\n  backend \"local\" {\n    path = \"terraform.tfstate\"\n  }\n}\n\nprovider \"aws\" {\n  region = \"eu-central-1\"\n}",
+    "validation": [
+      { "pattern": "backend\\s+\"s3\"", "message": "Используйте backend \"s3\" вместо \"local\"" },
+      { "pattern": "bucket\\s*=\\s*\"[^\"]+\"", "message": "Укажите имя S3 бакета (bucket = \"...\")" },
+      { "pattern": "dynamodb_table\\s*=\\s*\"[^\"]+\"", "message": "Укажите таблицу DynamoDB для блокировок (dynamodb_table = \"...\")" },
+      { "pattern": "encrypt\\s*=\\s*true", "message": "Включите шифрование стейта (encrypt = true)" }
+    ],
+    "hints": [
+      "Замените `backend \"local\"` на `backend \"s3\"`",
+      "Добавьте поля `bucket = \"company-tf-state\"`, `key = \"prod/app.tfstate\"`, `region = \"eu-central-1\"`",
+      "Обязательно укажите `dynamodb_table = \"terraform-locks\"` и `encrypt = true`"
+    ],
+    "solutionExample": "terraform {\n  required_version = \">= 1.5.0\"\n  \n  backend \"s3\" {\n    bucket         = \"company-tf-state\"\n    key            = \"prod/app.tfstate\"\n    region         = \"eu-central-1\"\n    encrypt        = true\n    dynamodb_table = \"terraform-locks\"\n  }\n}\n\nprovider \"aws\" {\n  region = \"eu-central-1\"\n}"
+  }
+}

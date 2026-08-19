@@ -1,0 +1,51 @@
+{
+  "id": "quest-network-01",
+  "zone": "network-crossroads",
+  "title": "Настройка Nginx Reverse Proxy и заголовков",
+  "category": "Networking",
+  "difficulty": "Easy",
+  "reward": {
+    "slaBonus": 0.05,
+    "credits": 200,
+    "badge": "NetOps Specialist L1"
+  },
+  "dialogue": {
+    "avatar": "daria",
+    "name": "Дарья (NetOps Engineer)",
+    "lines": [
+      "Привет! Трафик на перекрестке Network Crossroads полностью встал!",
+      "Наш Nginx шлет запросы на неправильный порт бэкенда и теряет реальные IP-адреса клиентов.",
+      "Из-за этого система антифрода блокирует легитимных пользователей!",
+      "Помоги настроить upstream, proxy_pass и правильную передачу заголовков Host, X-Real-IP и X-Forwarded-For!"
+    ]
+  },
+  "document": {
+    "title": "Nginx Reverse Proxy & HTTP Headers",
+    "theory": "### Проксирование трафика и заголовки в Nginx:\n- **`upstream`:** Определяет группу бэкенд-серверов с балансировкой нагрузки (по умолчанию round-robin).\n- **`proxy_pass`:** Перенаправляет входящий запрос на указанный upstream (например, `http://backend_upstream;`).\n- **`proxy_set_header Host $host;`:** Передает исходный домен клиента на бэкенд.\n- **`proxy_set_header X-Real-IP $remote_addr;`:** Передает реальный IP-адрес клиента.\n- **`proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;`:** Сохраняет цепочку прокси-серверов."
+  },
+  "challenge": {
+    "type": "monaco-patch",
+    "language": "ini",
+    "initialCode": "upstream backend_cluster {\n  server 127.0.0.1:9999; # ОШИБКА: бэкенд слушает на 8080!\n}\n\nserver {\n  listen 80;\n  server_name api.devops.city;\n\n  location / {\n    # Заполните proxy_pass и заголовки\n    proxy_pass http://127.0.0.1:9999;\n  }\n}\n",
+    "validation": [
+      {
+        "pattern": "server\\s+127\\.0\\.0\\.1:8080",
+        "message": "Укажите корректный порт бэкенда (8080) в блоке upstream"
+      },
+      {
+        "pattern": "proxy_pass\\s+http://backend_cluster",
+        "message": "Используйте именованный upstream 'http://backend_cluster' в директиве proxy_pass"
+      },
+      {
+        "pattern": "proxy_set_header\\s+X-Real-IP\\s+\\$remote_addr",
+        "message": "Добавьте проброс заголовка 'proxy_set_header X-Real-IP $remote_addr;'"
+      }
+    ],
+    "hints": [
+      "В блоке upstream замените 9999 на 8080",
+      "В location / укажите: proxy_pass http://backend_cluster;",
+      "Добавьте: proxy_set_header Host $host; и proxy_set_header X-Real-IP $remote_addr;"
+    ],
+    "solutionExample": "upstream backend_cluster {\n  server 127.0.0.1:8080;\n}\n\nserver {\n  listen 80;\n  server_name api.devops.city;\n\n  location / {\n    proxy_pass http://backend_cluster;\n    proxy_set_header Host $host;\n    proxy_set_header X-Real-IP $remote_addr;\n    proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;\n  }\n}\n"
+  }
+}

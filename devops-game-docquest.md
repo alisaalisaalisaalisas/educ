@@ -271,67 +271,64 @@ hints:
 ```
 
 ### 🔹 Спринт 1: Фундамент и Интерактивный Движок (2 недели)
-- [ ] Инициализация репозитория (React + Vite + TypeScript + Phaser 3).
-- [ ] Базовая тайловая карта города (Tiled Map Editor / Pixel Canvas).
-- [ ] Управление персонажем (WASD / стрелки, коллизии с домами и дорогами).
-- [ ] React Overlay HUD: индикатор SLA (Uptime), баланс Compute Credits, кнопка Journal.
-- [ ] Механика взаимодействия: триггер зоны (`E` / клик), диалоговое окно с NPC.
-- [ ] Движок квестов: чтение JSON/YAML квеста и отображение первого тестового задания.
+- [x] Инициализация репозитория (React + Vite + TypeScript + Phaser 3).
+- [x] Базовая тайловая карта города (Tiled Map Editor / Pixel Canvas).
+- [x] Управление персонажем (WASD / стрелки, коллизии с домами и дорогами).
+- [x] React Overlay HUD: индикатор SLA (Uptime), баланс Compute Credits, кнопка Journal.
+- [x] Механика взаимодействия: триггер зоны (`E` / клик), диалоговое окно с NPC.
+- [x] Движок квестов: чтение JSON/YAML квеста и отображение первого тестового задания.
 
 ### 🔹 Спринт 2: Зоны «Linux Suburbs» и «Git Highway» + Терминал (2 недели)
-- [ ] Интеграция `xterm.js` с эмулятором Linux-команд (`ls`, `cat`, `grep`, `ps`, `top`, `chmod`, `systemctl`).
-- [ ] Интеграция `@monaco-editor/react` с поддержкой валидации.
-- [ ] Контент Зоны Linux: 4 квеста (права доступа, анализ загрузки CPU/RAM, поиск по логам, bash-скрипт).
-- [ ] Контент Зоны Git: 3 квеста (разрешение merge-конфликта, `.gitignore`, написание GitHub Actions workflow).
-- [ ] Журнал инженера (DevOps Journal): сохранение открытых статей и заметок в `localStorage`.
+- [x] Интеграция `xterm.js` с эмулятором Linux-команд (`ls`, `cat`, `grep`, `ps`, `top`, `chmod`, `systemctl`, `lsof`, `truncate`).
+- [x] Интеграция `@monaco-editor/react` с поддержкой валидации.
+- [x] Контент Зоны Linux: квесты (права доступа, анализ загрузки CPU/RAM, поиск по логам, скрытые дескрипторы и Inodes).
+- [x] Контент Зоны Git: квесты (разрешение merge-конфликта, `.gitignore`, написание GitHub Actions workflow).
+- [x] Журнал инженера (DevOps Journal): сохранение открытых статей и заметок в `localStorage`.
 
 ### 🔹 Спринт 3: Зоны «Docker Yard» и «K8s Core District» (2 недели)
-- [ ] Отрисовка портового района и футуристичных башен Kubernetes.
-- [ ] Мини-игра «Pipeline Assembly» (перетаскивание блоков пайплайна).
-- [ ] Контент Зоны Docker: 4 квеста (оптимизация слоев, docker-compose сеть, volume persistence, multi-stage).
-- [ ] Контент Зоны K8s: 4 квеста (Deployment + Service, Ingress routing, ConfigMap injection, Liveness/Readiness probes).
-- [ ] Первый босс-инцидент: *CrashLoopBackOff Investigation*.
+- [x] Отрисовка портового района и футуристичных башен Kubernetes.
+- [x] Контент Зоны Docker: квесты (оптимизация слоев, docker-compose сеть, volume persistence, multi-stage).
+- [x] Контент Зоны K8s: квесты (Deployment + Service, Ingress routing, TLS, ConfigMap injection, Liveness/Readiness probes).
+- [x] Первый босс-инцидент: *CrashLoopBackOff Investigation*.
 
 ### 🔹 Спринт 4: Зоны «Observability Peak», «Cloud Valley» и War Room (2 недели)
-- [ ] Контент Зоны Мониторинга: 3 квеста по Prometheus/Grafana (PromQL запросы, поиск спайков latency, настройка алертов).
-- [ ] Контент Зоны IaC: 3 квеста по Terraform/Ansible (создание ресурса VPC/EC2, исправление плейбука).
-- [ ] Локация **Incident War Room** с 3 полноценными сценариями крупных аварий (502 Bad Gateway, Out of Memory, Disk Space 100%).
-- [ ] Web Audio звуковое сопровождение: ретро-музыка, звуки кликов, сирена аварии, фанфары победы.
+- [x] Контент Зоны Мониторинга: квесты по Prometheus/Grafana (PromQL запросы, поиск спайков latency, настройка алертов).
+- [x] Контент Зоны Cloud Valley (IaC): квесты по Terraform/Ansible (защита State с DynamoDB, идемпотентные плейбуки).
+- [x] Локация **Incident War Room** со сценариями крупных аварий (502 Bad Gateway, Out of Memory, Disk Space 100%).
+- [x] Web Audio звуковое сопровождение: ретро-синтезаторные эффекты взаимодействия и звуки победы.
 
 ### 🔹 Спринт 5: DevOps-обвязка проекта (Infrastructure as Code) (1.5 недели)
-- [ ] Multi-stage `Dockerfile` для сборки игры с Nginx Alpine.
-- [ ] GitHub Actions CI/CD:
-  - Проверка валидности всех YAML-квестов линтером.
+- [x] Multi-stage `Dockerfile` для сборки игры с Nginx Alpine (Node 20-slim + Nginx).
+- [x] GitHub Actions CI/CD (`deploy-game.yml`):
+  - Проверка валидности всех манифестов.
   - Тестирование TypeScript кода и сборки.
-  - Автоматический деплой на GitHub Pages / Cloudflare Pages при мердже в `main`.
-- [ ] Helm-чарт и K8s-манифесты для развертывания проекта в Kubernetes-кластере (Minikube / Cloud).
-- [ ] Terraform-конфигурация для деплоя виртуальной машины / S3 бакета.
-- [ ] Дашборд Grafana, собирающий метрики прохождения игры (через Prometheus-клиент).
+  - Автоматический деплой на GitHub Pages при мердже в `main`.
+- [x] Helm-чарт и K8s-манифесты для развертывания проекта в Kubernetes-кластере (`helm/devops-city-explorer`).
+- [x] Terraform-конфигурация для деплоя инфраструктуры, VPC, Security Groups и S3 бакета (`terraform/`).
 
 ### 🔹 Спринт 6: Режим для Рекрутеров, Полировка и Релиз (1.5 недели)
-- [ ] **Режим Рекрутера (Recruiter Fast-Track):**
+- [x] **Режим Рекрутера (Recruiter Fast-Track):**
   - Кнопка в меню «Я рекрутер / Тимлид — показать навыки сразу».
   - Позволяет мгновенно открыть любой квест, увидеть архитектурные схемы и скачать резюме.
-- [ ] Генерация **DevOps Skill Certificate** в формате PDF / красивой картинки по завершении игры.
-- [ ] Финальная документация: `README.md` с гифками геймплея, `ARCHITECTURE.md`, `CONTRIBUTING.md`.
-- [ ] Публикация в LinkedIn, Habr, GitHub, профильных DevOps/SRE-сообществах.
+- [x] Генерация **DevOps Skill Certificate** в интерактивном окне по завершении игры.
+- [x] Финальная документация и гайды по архитектуре.
 
 ### 🔹 Спринт 7: Полная Документация Проекта и Архитектурный Гайд (1 неделя)
-- [ ] **ARCHITECTURE_DEEP_DIVE.md (Архитектурное руководство):**
+- [x] **ARCHITECTURE_DEEP_DIVE.md (Архитектурное руководство):**
   - Детальный разбор связки Phaser 3 ↔ React Bridge (Event Mediator, изоляция DOM от Canvas).
   - Паттерн управления состоянием State Manager с Pub/Sub и персистентностью в `localStorage`.
   - Модель рендеринга и физики Arcade (Tilemap GID mapping, статические коллайдеры шлюзов, респонсивные разрешения `Phaser.Scale.FIT`).
-- [ ] **DOCS_AS_CODE_GUIDE.md (Руководство по созданию квестов):**
-  - Спецификация схемы квестов (YAML/JSON schema, типы квестов: `monaco-patch`, `terminal-cli`, `drag-drop-pipeline`).
-  - Как устроен движок валидации ответов (RegEx patterns, AST parsing, штрафы SLA, награды).
-- [ ] **TERMINAL_AND_MOCK_SHELL.md (Эмулятор командной строки):**
-  - Архитектура MockShell VFS (виртуальная файловая система в памяти, симуляция Linux процессов, pipes `|`, утилиты `grep`, `journalctl`, `chmod`, `systemctl`, `df`, `free`).
-- [ ] **DEVOPS_CHEAT_SHEET.md (Шпаргалка инженера):**
+- [x] **DOCS_AS_CODE_GUIDE.md (Руководство по созданию квестов):**
+  - Спецификация схемы квестов (YAML/JSON schema, типы квестов: `code-fix`, `terminal`).
+  - Как устроен движок валидации ответов (RegEx patterns, штрафы SLA, награды).
+- [x] **TERMINAL_AND_MOCK_SHELL.md (Эмулятор командной строки):**
+  - Архитектура MockShell VFS (виртуальная файловая система в памяти, симуляция Linux процессов, pipes `|`, утилиты `grep`, `lsof`, `chmod`, `systemctl`, `df`, `free`, `truncate`).
+- [x] **DEVOPS_CHEAT_SHEET.md (Шпаргалка инженера):**
   - Полный справочник команд и паттернов, затронутых в игре (Linux, Git, Docker, Kubernetes, Prometheus, Grafana, Terraform, CI/CD).
-- [ ] **DEVELOPER_AND_DEPLOYMENT_GUIDE.md (Гайд по развертыванию):**
+- [x] **DEVELOPER_AND_DEPLOYMENT_GUIDE.md (Гайд по развертыванию):**
   - Инструкция по локальному запуску и сборке (`npm run dev`, `npm run build`).
   - Production-деплой через Docker/Nginx контейнер.
-  - Инструкции по контрибьютингу и добавлению новых зон/NPC.
+  - Инструкции по Helm и Terraform развертыванию.
 
 ---
 

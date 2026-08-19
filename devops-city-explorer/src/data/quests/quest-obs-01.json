@@ -1,0 +1,49 @@
+{
+  "id": "quest-obs-01",
+  "zone": "observability-peak",
+  "title": "Составление PromQL запросов и 95-го перцентиля задержки",
+  "category": "Observability",
+  "difficulty": "Medium",
+  "reward": {
+    "slaBonus": 0.05,
+    "credits": 300,
+    "badge": "PromQL Master L1"
+  },
+  "dialogue": {
+    "avatar": "igor",
+    "name": "Игорь (SRE Observability)",
+    "lines": [
+      "Приветствую на вершине Observability Peak!",
+      "У нас в Grafana горит алерт HighLatencySpike, но разработчики не верят среднему арифметическому значению (avg), так как оно скрывает пиковые задержки.",
+      "Помоги составить точный PromQL-запрос для вычисления 95-го перцентиля (P95) времени ответа бэкенда по гистограмме http_request_duration_seconds_bucket!"
+    ]
+  },
+  "document": {
+    "title": "PromQL Histograms and Quantiles",
+    "theory": "### Расчет перцентилей в Prometheus (PromQL):\n- **`histogram_quantile(φ, sum(rate(metric_bucket[5m])) by (le))`:** Стандартная формула расчета φ-квантиля (например, 0.95 для 95-го перцентиля, 0.99 для 99-го).\n- **Обязательное условие:** Всегда агрегируйте по лейблу `le` (Less or Equal) внутри `sum(...) by (le)` перед передачей в функцию `histogram_quantile`.\n- **Скорость ошибок (Error Rate %):** `sum(rate(http_requests_total{status=~\"5..\"}[5m])) / sum(rate(http_requests_total[5m])) * 100`"
+  },
+  "challenge": {
+    "type": "monaco-patch",
+    "language": "yaml",
+    "initialCode": "# Сформулируйте PromQL правило для Alertmanager\n- alert: APIHighLatencyP95\n  expr: avg(http_request_duration_seconds) > 0.5 # ОШИБКА: среднее скрывает медленные запросы!\n  for: 5m\n  labels:\n    severity: critical\n  annotations:\n    summary: \"95th percentile latency is too high\"\n",
+    "validation": [
+      {
+        "pattern": "histogram_quantile\\s*\\(\\s*0\\.95\\s*,",
+        "message": "Используйте функцию histogram_quantile(0.95, ...)"
+      },
+      {
+        "pattern": "sum\\s*\\(\\s*rate\\s*\\(\\s*http_request_duration_seconds_bucket\\[5m\\]\\s*\\)\\s*\\)\\s*by\\s*\\(\\s*le\\s*\\)",
+        "message": "Примените sum(rate(http_request_duration_seconds_bucket[5m])) by (le)"
+      },
+      {
+        "pattern": ">\\s*(0\\.5|500ms)",
+        "message": "Укажите порог срабатывания алерта (> 0.5)"
+      }
+    ],
+    "hints": [
+      "Замените строку expr на:",
+      "expr: histogram_quantile(0.95, sum(rate(http_request_duration_seconds_bucket[5m])) by (le)) > 0.5"
+    ],
+    "solutionExample": "- alert: APIHighLatencyP95\n  expr: histogram_quantile(0.95, sum(rate(http_request_duration_seconds_bucket[5m])) by (le)) > 0.5\n  for: 5m\n  labels:\n    severity: critical\n  annotations:\n    summary: \"95th percentile latency is too high\"\n"
+  }
+}

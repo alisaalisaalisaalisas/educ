@@ -1,0 +1,44 @@
+{
+  "id": "quest-k8s-02",
+  "zone": "k8s-core",
+  "title": "Ingress Routing & TLS Termination",
+  "category": "Orchestration",
+  "difficulty": "Medium",
+  "reward": {
+    "slaBonus": 0.05,
+    "credits": 200,
+    "badge": "Ingress Traffic Master"
+  },
+  "npc": "elena",
+  "dialogue": {
+    "avatar": "elena",
+    "name": "Security Auditor Елена",
+    "lines": [
+      "Служба безопасности обнаружила, что сервисы выставлены наружу через NodePort без HTTPS!",
+      "Это грубейшее нарушение стандартов PCI-DSS.",
+      "Нам нужен декларативный манифест `Ingress` c поддержкой `ingressClassName: nginx`, TLS-сертификатом `api-tls-secret` и проксированием пути `/api` на Service `api-service` (порт 80)."
+    ]
+  },
+  "document": {
+    "title": "Kubernetes Ingress & TLS Architecture",
+    "theory": "### Kubernetes Ingress\n\nIngress предоставляет единую точку входа (L7 маршрутизация HTTP/HTTPS) для сервисов внутри кластера.\n\n**Обязательные секции:**\n- `ingressClassName: nginx` (или traefik/istio)\n- `tls`: массив хостов и секретов с сертификатами (`secretName`)\n- `rules`: маршруты по хостам и префиксам путей (`pathType: Prefix`)\n- `backend`: указание целевого `service.name` и `service.port.number`"
+  },
+  "challenge": {
+    "type": "code-fix",
+    "language": "yaml",
+    "initialCode": "apiVersion: networking.k8s.io/v1\nkind: Ingress\nmetadata:\n  name: app-ingress\n  annotations:\n    cert-manager.io/cluster-issuer: \"letsencrypt-prod\"\nspec:\n  # TODO: Задайте ingressClassName, TLS и правила маршрутизации\n",
+    "validation": [
+      { "pattern": "ingressClassName:\\s+nginx", "message": "Укажите ingressClassName: nginx" },
+      { "pattern": "secretName:\\s+api-tls-secret", "message": "Сконфигурируйте TLS секрет api-tls-secret" },
+      { "pattern": "path:\\s+/api", "message": "Добавьте путь /api" },
+      { "pattern": "name:\\s+api-service", "message": "Укажите backend service api-service" },
+      { "pattern": "number:\\s+80", "message": "Укажите порт бэкенда 80" }
+    ],
+    "hints": [
+      "Добавьте `ingressClassName: nginx` в блок `spec`",
+      "В секции `tls:` укажите `- hosts: ['api.example.com']` и `secretName: api-tls-secret`",
+      "В `rules:` направьте путь `/api` с `pathType: Prefix` на `api-service` (порт 80)"
+    ],
+    "solutionExample": "apiVersion: networking.k8s.io/v1\nkind: Ingress\nmetadata:\n  name: app-ingress\n  annotations:\n    cert-manager.io/cluster-issuer: \"letsencrypt-prod\"\nspec:\n  ingressClassName: nginx\n  tls:\n    - hosts:\n        - api.example.com\n      secretName: api-tls-secret\n  rules:\n    - host: api.example.com\n      http:\n        paths:\n          - path: /api\n            pathType: Prefix\n            backend:\n              service:\n                name: api-service\n                port:\n                  number: 80"
+  }
+}

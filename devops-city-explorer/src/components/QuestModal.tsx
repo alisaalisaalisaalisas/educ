@@ -1,4 +1,7 @@
 import React, { useState, useCallback } from 'react';
+import { CodeEditor } from './CodeEditor';
+import { TerminalView } from './TerminalView';
+import { CommandResult } from '../game/terminal/MockShell';
 
 interface ValidationRule {
   pattern: string;
@@ -46,16 +49,23 @@ interface ValidationResult {
 
 export const QuestModal: React.FC<QuestModalProps> = ({ quest, onComplete, onClose }) => {
   const [code, setCode] = useState(quest.challenge.initialCode);
+  const [executedCommands, setExecutedCommands] = useState<string[]>([]);
   const [results, setResults] = useState<ValidationResult[]>([]);
   const [showHints, setShowHints] = useState(false);
   const [hintIndex, setHintIndex] = useState(0);
   const [solved, setSolved] = useState(false);
 
-  const validate = useCallback(() => {
+  const isTerminalQuest = quest.challenge.type === 'terminal-cli';
+
+  const validate = useCallback((allCommands?: string[]) => {
+    const textToTest = isTerminalQuest
+      ? (allCommands || executedCommands).join('\n')
+      : code;
+
     const validationResults = quest.challenge.validation.map((rule) => {
       const regex = new RegExp(rule.pattern, 'im');
       return {
-        passed: regex.test(code),
+        passed: regex.test(textToTest),
         message: rule.message,
       };
     });
@@ -64,7 +74,15 @@ export const QuestModal: React.FC<QuestModalProps> = ({ quest, onComplete, onClo
     if (validationResults.every(r => r.passed)) {
       setSolved(true);
     }
-  }, [code, quest.challenge.validation]);
+  }, [code, executedCommands, isTerminalQuest, quest.challenge.validation]);
+
+  const handleCommandExecuted = useCallback((cmd: string, _res: CommandResult) => {
+    if (cmd.trim()) {
+      const updated = [...executedCommands, cmd.trim()];
+      setExecutedCommands(updated);
+      validate(updated);
+    }
+  }, [executedCommands, validate]);
 
   const revealHint = () => {
     setShowHints(true);
@@ -81,7 +99,7 @@ export const QuestModal: React.FC<QuestModalProps> = ({ quest, onComplete, onClo
         return <p key={i}><strong>{line.replace(/\*\*/g, '')}</strong></p>;
       }
       if (line.startsWith('- ')) {
-        return null; // collected below
+        return null;
       }
       if (line.trim() === '') return null;
       const formatted = line.replace(/`([^`]+)`/g, '<code>$1</code>');
@@ -102,22 +120,9 @@ export const QuestModal: React.FC<QuestModalProps> = ({ quest, onComplete, onClo
     );
   };
 
-  const handleKeyDown = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
-    if (e.key === 'Tab') {
-      e.preventDefault();
-      const target = e.target as HTMLTextAreaElement;
-      const start = target.selectionStart;
-      const end = target.selectionEnd;
-      setCode(code.substring(0, start) + '  ' + code.substring(end));
-      setTimeout(() => {
-        target.selectionStart = target.selectionEnd = start + 2;
-      }, 0);
-    }
-  };
-
   return (
     <div className="quest-overlay">
-      <div className="quest-modal">
+      <div className={`quest-modal ${isTerminalQuest ? 'quest-modal--wide' : ''}`}>
         <div className="quest-modal__header">
           <div className="quest-modal__title-group">
             <span className="quest-modal__category">{quest.category} • {quest.difficulty}</span>
@@ -133,14 +138,14 @@ export const QuestModal: React.FC<QuestModalProps> = ({ quest, onComplete, onClo
               <div className="quest-success__title">Квест выполнен!</div>
               <div className="quest-success__rewards">
                 <span>📊 SLA +{quest.reward.slaBonus}%</span>
-                <span>⚡ +{quest.reward.credits}</span>
+                <span>⚡ +{quest.reward.credits} Compute Credits</span>
                 <span>🏅 {quest.reward.badge}</span>
               </div>
               <button
                 className="quest-success__continue"
                 onClick={() => onComplete(quest.id, quest.reward)}
               >
-                Продолжить ▸
+                Зафиксировать победу в журнале ▸
               </button>
             </div>
           ) : (
@@ -150,19 +155,28 @@ export const QuestModal: React.FC<QuestModalProps> = ({ quest, onComplete, onClo
                 {renderListItems(quest.document.theory)}
               </div>
 
-              <div className="quest-editor">
-                <div className="quest-editor__label">
-                  Редактор
-                  <span className="quest-editor__language">{quest.challenge.language}</span>
+              {isTerminalQuest ? (
+                <div className="quest-terminal-wrapper">
+                  <div className="quest-editor__label">
+                    Интерактивная консоль восстановления
+                    <span className="quest-editor__language">Mock Linux Shell</span>
+                  </div>
+                  <TerminalView onCommandExecuted={handleCommandExecuted} />
                 </div>
-                <textarea
-                  className="quest-editor__textarea"
-                  value={code}
-                  onChange={e => setCode(e.target.value)}
-                  onKeyDown={handleKeyDown}
-                  spellCheck={false}
-                />
-              </div>
+              ) : (
+                <div className="quest-editor">
+                  <div className="quest-editor__label">
+                    Редактор конфигурации (Monaco Engine)
+                    <span className="quest-editor__language">{quest.challenge.language}</span>
+                  </div>
+                  <CodeEditor
+                    value={code}
+                    onChange={setCode}
+                    language={quest.challenge.language === 'dockerfile' ? 'dockerfile' : quest.challenge.language}
+                    height="280px"
+                  />
+                </div>
+              )}
 
               {results.length > 0 && (
                 <div className="quest-validation">
@@ -197,8 +211,8 @@ export const QuestModal: React.FC<QuestModalProps> = ({ quest, onComplete, onClo
               <span className="quest-modal__reward-item">🏅 {quest.reward.badge}</span>
               <span className="quest-modal__reward-item">⚡ +{quest.reward.credits}</span>
             </div>
-            <button className="quest-modal__submit" onClick={validate}>
-              Проверить решение ▸
+            <button className="quest-modal__submit" onClick={() => validate()}>
+              {isTerminalQuest ? 'Проверить состояние системы ▸' : 'Проверить решение ▸'}
             </button>
           </div>
         )}

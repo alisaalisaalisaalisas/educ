@@ -11,18 +11,39 @@ import { Toast, ToastMessage } from './components/Toast';
 
 import questDocker01 from './data/quests/quest-docker-01.json';
 import questLinux01 from './data/quests/quest-linux-01.json';
+import questLinux02 from './data/quests/quest-linux-02.json';
 import questK8s01 from './data/quests/quest-k8s-01.json';
+import questK8s02 from './data/quests/quest-k8s-02.json';
+import questGit01 from './data/quests/quest-git-01.json';
+import questNetwork01 from './data/quests/quest-network-01.json';
+import questObs01 from './data/quests/quest-obs-01.json';
+import questTerraform01 from './data/quests/quest-terraform-01.json';
+import questAnsible01 from './data/quests/quest-ansible-01.json';
+import questWarroom01 from './data/quests/quest-warroom-01.json';
 
 const QUESTS: Record<string, any> = {
   'quest-docker-01': questDocker01,
   'quest-linux-01': questLinux01,
+  'quest-linux-02': questLinux02,
   'quest-k8s-01': questK8s01,
+  'quest-k8s-02': questK8s02,
+  'quest-git-01': questGit01,
+  'quest-network-01': questNetwork01,
+  'quest-obs-01': questObs01,
+  'quest-terraform-01': questTerraform01,
+  'quest-ansible-01': questAnsible01,
+  'quest-warroom-01': questWarroom01,
 };
 
 const NPC_QUESTS: Record<string, string> = {
   vasya: 'quest-docker-01',
   elena: 'quest-k8s-01',
   boris: 'quest-linux-01',
+  matvey: 'quest-git-01',
+  daria: 'quest-network-01',
+  igor: 'quest-obs-01',
+  artem: 'quest-terraform-01',
+  siren: 'quest-warroom-01',
 };
 
 type Screen = 'game' | 'dialogue' | 'quest' | 'journal' | 'help' | 'recruiter';
@@ -103,6 +124,11 @@ export const App: React.FC = () => {
         'linux-suburbs': 'quest-linux-01',
         'docker-yard': 'quest-docker-01',
         'k8s-core': 'quest-k8s-01',
+        'git-bridge': 'quest-git-01',
+        'network-crossroads': 'quest-network-01',
+        'observability-peak': 'quest-obs-01',
+        'cloud-valley': 'quest-terraform-01',
+        'incident-war-room': 'quest-warroom-01',
       };
       const questId = zoneQuests[terminalZone];
       if (questId && QUESTS[questId]) {

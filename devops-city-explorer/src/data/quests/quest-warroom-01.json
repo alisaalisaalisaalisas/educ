@@ -1,0 +1,47 @@
+{
+  "id": "quest-warroom-01",
+  "zone": "incident-war-room",
+  "title": "БОСС-ИНЦИДЕНТ 1: The Phantom 502 & OOM-Killer Investigation",
+  "category": "Major Incident (War Room)",
+  "difficulty": "Hard",
+  "reward": {
+    "slaBonus": 0.10,
+    "credits": 500,
+    "badge": "Incident Commander L1"
+  },
+  "dialogue": {
+    "avatar": "siren",
+    "name": "🚨 Сирена Аварийной Смены (Incident Dispatcher)",
+    "lines": [
+      "ВНИМАНИЕ! ВСЕМ ПОСТАМ! НА ПРОДАКШЕНЕ МАСШТАБНАЯ АВАРИЯ!",
+      "Всплеск 502 Bad Gateway > 25%! Пользователи не могут авторизоваться, SLA стремительно падает!",
+      "Аварийный терминал ноды открыт. Проведи расследование: выясни причину падения (логи Nginx/dmesg), восстанови бэкенд и проверь код ответа 200 OK через curl!"
+    ]
+  },
+  "document": {
+    "title": "Major Incident Triage Playbook",
+    "theory": "### Алгоритм расследования аварии:\n1. **Логи Nginx:** `cat /var/log/nginx/error.log` или `grep 502 /var/log/nginx/access.log`\n2. **Диагностика ядра и OOM:** `dmesg | grep -i oom` (поиск Exit Code 137)\n3. **Статус службы:** `systemctl status backend-app`\n4. **Перезапуск службы:** `systemctl restart backend-app`\n5. **Верификация работоспособности:** `curl -I http://127.0.0.1:8080/health` или `curl http://api.devops.city`"
+  },
+  "challenge": {
+    "type": "terminal-cli",
+    "language": "bash",
+    "initialCode": "# Выполняйте диагностические и восстановительные команды в терминале ниже\n",
+    "validation": [
+      {
+        "pattern": "(systemctl\\s+restart\\s+backend-app|systemctl\\s+start\\s+backend-app)",
+        "message": "Перезапустите упавший сервис: systemctl restart backend-app"
+      },
+      {
+        "pattern": "(curl.*(:8080|api\\.devops\\.city|/health))",
+        "message": "Проверьте статус доступности сервиса через curl"
+      }
+    ],
+    "hints": [
+      "Проверьте логи Nginx: cat /var/log/nginx/error.log",
+      "Проверьте OOM-Killer ядра: dmesg | grep -i oom",
+      "Перезапустите бэкенд: systemctl restart backend-app",
+      "Проверьте ответ сервиса: curl -I http://127.0.0.1:8080/health"
+    ],
+    "solutionExample": "systemctl restart backend-app && curl -I http://127.0.0.1:8080/health"
+  }
+}

@@ -62,7 +62,7 @@ const SKILLS: SkillItem[] = [
 export const RecruiterModal: React.FC<RecruiterModalProps> = ({ gameState, onClose }) => {
   const [selectedCategory, setSelectedCategory] = useState<string>('all');
 
-  const categories = ['all', 'Containers', 'Orchestration', 'OS Core', 'Automation', 'Monitoring'];
+  const categories = ['all', 'Containers', 'Orchestration', 'OS Core', 'Automation', 'Monitoring', 'Cloud & IaC'];
   const filteredSkills = selectedCategory === 'all'
     ? SKILLS
     : SKILLS.filter(s => s.category === selectedCategory);
@@ -92,7 +92,7 @@ export const RecruiterModal: React.FC<RecruiterModalProps> = ({ gameState, onClo
               </p>
               <div className="recruiter-stats">
                 <div className="stat-pill">
-                  <span className="stat-pill__num">{completedQuestsCount}/3</span>
+                  <span className="stat-pill__num">{completedQuestsCount}/7</span>
                   <span className="stat-pill__label">Квестов пройдено</span>
                 </div>
                 <div className="stat-pill">

@@ -1,0 +1,44 @@
+{
+  "id": "quest-ansible-01",
+  "zone": "cloud-valley",
+  "title": "Идемпотентный Ansible Playbook для Nginx",
+  "category": "Automation",
+  "difficulty": "Medium",
+  "reward": {
+    "slaBonus": 0.04,
+    "credits": 180,
+    "badge": "Ansible Automation Master"
+  },
+  "npc": "artem",
+  "dialogue": {
+    "avatar": "artem",
+    "name": "Cloud Архитектор Артём",
+    "lines": [
+      "Дежурный инженер написал bash-скрипт для настройки 50 серверов, но он падает при повторном запуске!",
+      "Нам нужен чистый, идемпотентный Ansible Playbook.",
+      "Он должен установить пакет `nginx`, задеплоить конфигурационный файл через шаблон и запустить сервис `nginx` с состоянием `started` и `enabled: yes`."
+    ]
+  },
+  "document": {
+    "title": "Ansible Best Practices: Idempotency & Handlers",
+    "theory": "### Принцип идемпотентности в Ansible\n\nПлейбук можно запускать 1 раз или 100 раз — результат должен быть одинаковым без лишних изменений.\n\n**Ключевые модули:**\n- `ansible.builtin.apt` / `package`: установка пакетов со `state: present` или `state: latest`\n- `ansible.builtin.template` / `copy`: копирование конфигов с проверкой контрольной суммы\n- `ansible.builtin.systemd` / `service`: управление сервисами (`state: started`, `enabled: yes`)\n- `handlers` и `notify`: перезапуск сервиса только при реальном изменении конфигурации"
+  },
+  "challenge": {
+    "type": "code-fix",
+    "language": "yaml",
+    "initialCode": "- name: Configure Web Servers\n  hosts: webservers\n  become: true\n  tasks:\n    # TODO: Добавьте таски для apt, template и service\n",
+    "validation": [
+      { "pattern": "name:\\s+.*(nginx|Nginx)", "message": "Опишите задачи по установке и настройке Nginx" },
+      { "pattern": "(apt|package):", "message": "Используйте модуль apt или package для установки" },
+      { "pattern": "state:\\s+(present|latest)", "message": "Укажите state: present для пакета" },
+      { "pattern": "(service|systemd):", "message": "Используйте модуль service или systemd" },
+      { "pattern": "state:\\s+started", "message": "Убедитесь, что сервис запущен (state: started)" },
+      { "pattern": "enabled:\\s+(yes|true)", "message": "Убедитесь, что сервис добавлен в автозагрузку (enabled: yes)" }
+    ],
+    "hints": [
+      "Используйте модуль `ansible.builtin.apt` с параметрами `name: nginx` и `state: present`",
+      "Для управления сервисом используйте модуль `service` с параметрами `name: nginx`, `state: started`, `enabled: true`"
+    ],
+    "solutionExample": "- name: Configure Web Servers\n  hosts: webservers\n  become: true\n  tasks:\n    - name: Install Nginx\n      apt:\n        name: nginx\n        state: present\n        update_cache: yes\n\n    - name: Ensure Nginx is running and enabled\n      service:\n        name: nginx\n        state: started\n        enabled: true"
+  }
+}

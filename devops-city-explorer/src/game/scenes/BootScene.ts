@@ -346,14 +346,28 @@ export class BootScene extends Phaser.Scene {
         graphics.strokeRect(10, 6, 4, 4);
         graphics.strokeRect(18, 6, 4, 4);
         graphics.fillRect(14, 8, 4, 1);
+      } else if (accessory === 'siren') {
+        graphics.fillStyle(0xef4444, 1);
+        graphics.fillCircle(16, 2, 4);
+        graphics.fillStyle(0xffffff, 0.9);
+        graphics.fillCircle(16, 2, 2);
+      } else if (accessory === 'cap') {
+        graphics.fillStyle(0xd97706, 1);
+        graphics.fillRect(8, 1, 16, 4);
+        graphics.fillRect(14, 4, 10, 2);
       }
       
       graphics.generateTexture(key, 32, 32);
     };
     
-    makeNPC('npc-vasya', 0x16a34a, 0x78350f, 'glasses');
-    makeNPC('npc-elena', 0x2563eb, 0x1e1b4b, 'badge');
-    makeNPC('npc-boris', 0x475569, 0x94a3b8, 'beard');
+    makeNPC('npc-vasya', 0x16a34a, 0x78350f, 'glasses'); // Junior Dev
+    makeNPC('npc-elena', 0x2563eb, 0x1e1b4b, 'badge');   // SRE Architect
+    makeNPC('npc-boris', 0x475569, 0x94a3b8, 'beard');   // Sysadmin
+    makeNPC('npc-matvey', 0xf59e0b, 0x451a03, 'cap');    // Git/CI Guru
+    makeNPC('npc-daria', 0xec4899, 0x831843, 'glasses'); // NetOps Engineer
+    makeNPC('npc-igor', 0x8b5cf6, 0x1e1b4b, 'glasses');  // SRE Observability
+    makeNPC('npc-artem', 0x0284c7, 0x1e293b, 'glasses'); // Cloud/IaC Architect
+    makeNPC('npc-siren', 0xdc2626, 0x18181b, 'siren');   // Incident Dispatcher
   }
 
   private createUIElements() {
