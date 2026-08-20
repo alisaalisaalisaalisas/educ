@@ -1,0 +1,43 @@
+{
+  "id": "quest-pipeline-01",
+  "zone": "pipeline-plaza",
+  "title": "Собери пайплайн релиза",
+  "category": "CI/CD",
+  "difficulty": "Medium",
+  "reward": {
+    "slaBonus": 0.04,
+    "credits": 160,
+    "badge": "Pipeline Architect L1"
+  },
+  "npc": "genadiy",
+  "dialogue": {
+    "avatar": "genadiy",
+    "name": "Genadiy [Pipeline]",
+    "lines": [
+      "Пайплайн опять сыпется на артефактах.",
+      "Стажёры перетасовали стадии — теперь всё происходит не по порядку.",
+      "Собери корректный pipeline-as-code: checkout → test → build → scan → publish.",
+      "Порядок решает всё: деплой после сборки, а не наоборот!"
+    ]
+  },
+  "document": {
+    "title": "Pipeline-as-Code: стадии релиза",
+    "theory": "### Порядок стадий CI/CD пайплайна\n\n- **checkout** — получить исходный код из репозитория\n- **test** — unit- и интеграционные тесты\n- **build** — компиляция и сборка артефакта (JAR/WHEEL/образ)\n- **scan** — проверка зависимостей и уязвимостей (SAST/Dependency)\n- **publish** — публикация артефакта в реестр (Nexus/Artifactory/Container Registry)\n\n**Правило:** артефакт публикуется только после успешной сборки и сканирования."
+  },
+  "challenge": {
+    "type": "sequence",
+    "hints": [
+      "Код всегда попадает в пайплайн первым делом — это checkout.",
+      "Безопасность сканируется ДО публикации, но ПОСЛЕ сборки.",
+      "Результат любой стадии — вход для следующей."
+    ],
+    "sequenceSteps": [
+      "checkout",
+      "test",
+      "build",
+      "scan",
+      "publish"
+    ],
+    "solutionExample": "checkout → test → build → scan → publish"
+  }
+}

@@ -1,8 +1,10 @@
 import Phaser from 'phaser';
 import { gameConfig } from './config';
+import { BootScene } from './scenes/BootScene';
+import { CityScene } from './scenes/CityScene';
 
 export type InteractionEvent = {
-  type: 'npc' | 'terminal' | 'door' | 'zone-enter';
+  type: 'npc' | 'terminal' | 'door' | 'zone-enter' | 'library' | 'shop' | 'warp' | 'minigame' | 'sign';
   id: string;
   data: Record<string, unknown>;
 };
@@ -35,6 +37,7 @@ export class GameBridge {
     const config = {
       ...gameConfig,
       parent: containerId,
+      scene: [BootScene, CityScene],
     };
     this.game = new Phaser.Game(config);
 
@@ -67,6 +70,18 @@ export class GameBridge {
     return () => {
       this.playerStateCallbacks = this.playerStateCallbacks.filter(cb => cb !== callback);
     };
+  }
+
+  setInputEnabled(enabled: boolean) {
+    if (this.game && this.game.input && this.game.input.keyboard) {
+      this.game.input.keyboard.enabled = enabled;
+    }
+  }
+
+  teleport(x: number, y: number) {
+    if (this.game) {
+      this.game.events.emit('teleport', { x, y });
+    }
   }
 
   destroy() {

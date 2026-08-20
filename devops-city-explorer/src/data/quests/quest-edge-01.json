@@ -1,0 +1,41 @@
+{
+  "id": "quest-edge-01",
+  "zone": "edge-refinery",
+  "title": "CDN и кэш-промахи",
+  "category": "Edge/CDN",
+  "difficulty": "Hard",
+  "reward": {
+    "slaBonus": 0.06,
+    "credits": 210,
+    "badge": "Edge Caching Engineer L1"
+  },
+  "npc": "toha",
+  "dialogue": {
+    "avatar": "toha",
+    "name": "Toha [Edge]",
+    "lines": [
+      "Пиковая нагрузка легла на origin, потому что кэш промахивается.",
+      "У всех ответов слетел Cache-Control, статика качается заново каждый раз.",
+      "Почини конфиг CDN для статических ассетов.",
+      "Кэш должен держать статику долго, а HTML — коротко."
+    ]
+  },
+  "document": {
+    "title": "Кэширование на Edge",
+    "theory": "### Заголовки кэширования\n\n- `Cache-Control: public, max-age=31536000, immutable` — статика кэшируется на год\n- `Cache-Control: no-cache` — условные запросы (проверка по ETag)\n- Версионируем статику через хэш в имени файла\n- Персональные данные: `private, no-store` — never cache\n\n**Правило:** чем выше hit-ratio кэша, тем меньше нагрузка на origin."
+  },
+  "challenge": {
+    "type": "code-fix",
+    "language": "typescript",
+    "initialCode": "// Почини Edge функция: закэшируй статику правильно\nconst STATIC_TTL = 60; // seconds\n\nexport async function onRequest(ctx) {\n  const path = new URL(ctx.request.url).pathname;\n  if (path.startsWith('/assets/')) {\n    ctx.headers.set('Cache-Control', 'no-store');\n  } else {\n    ctx.headers.set('Cache-Control', 'private, max-age=0');\n  }\n  return ctx.next();\n}",
+    "validation": [
+      { "pattern": "STATIC_TTL\\s*=\\s*3\\s*1\\s*5\\s*3\\s*6\\s*0\\s*0", "message": "STATIC_TTL слишком мал — для статики нужен max-age=31536000" },
+      { "pattern": "public,\\s*max-age=\\s*\\$\\{STATIC_TTL\\}", "message": "Для /assets/ используйте Cache-Control: public, max-age=${STATIC_TTL}" }
+    ],
+    "hints": [
+      "Подсказка: static TTL — год в секундах: 31536000.",
+      "Подсказка: для статики ставьте public, а для остального — приватный кэш."
+    ],
+    "solutionExample": "const STATIC_TTL = 31536000;\nctx.headers.set('Cache-Control', `public, max-age=${STATIC_TTL}`);"
+  }
+}

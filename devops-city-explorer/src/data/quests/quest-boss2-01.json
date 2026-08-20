@@ -1,0 +1,44 @@
+{
+  "id": "quest-boss2-01",
+  "zone": "incident-war-room",
+  "title": "БОСС 2: Авария БД — полная потеря соединения",
+  "category": "Incident",
+  "difficulty": "Nightmare",
+  "reward": {
+    "slaBonus": 0.08,
+    "credits": 400,
+    "badge": "Disaster Recovery Specialist L1"
+  },
+  "npc": "boss2",
+  "dialogue": {
+    "avatar": "siren",
+    "name": "🚨 Сирена [WarRoom]",
+    "lines": [
+      "ВНИМАНИЕ. Критический инцидент P0: БД легла, кластер в панике.",
+      "Сначала подтверди доступность СУБД, затем найди недижурного губителя.",
+      "Проверь место на диске, затем восстанови сервис и перезапусти реплики.",
+      "Это уровень Nightmare. Действуй методично!"
+    ]
+  },
+  "document": {
+    "title": "Disaster Recovery: восстановление БД",
+    "theory": "### Порядок реагирования на аварию БД\n\n- `systemctl status postgresql` — состояние сервиса\n- `df -h` — заполнение диска (главный убийца БД)\n- `journalctl -xe` — свежие ошибки СУБД\n- Освободить место / откатить переполнившую таблицу\n- `systemctl start postgresql` — поднять сервис\n- `pg_reload_conf()` / `systemctl restart postgresql` — корректный перезапуск\n\n**Правило:** сначала диагностика, потом действия. Не перезапускайте службу до выяснения причины."
+  },
+  "challenge": {
+    "type": "terminal",
+    "language": "bash",
+    "initialCode": "# БОСС 2: БД недоступна. Проверь здоровье кластера и восстанови доступ.\n# 1) Проверь состояние службы postgresql\n# 2) Найди причину (проверь диск)\n# 3) Запиши команду корректного старта службы\n# 4) Проверь, что реплика синхронизирована\n\n# Команда диагностики службы:\n\n# Команда проверки диска:\n\n# Команда старта службы:\n\n# Команда проверки реплики:\n",
+    "validation": [
+      { "pattern": "systemctl\\s+(status|is-active)\\s+postgresql", "message": "Сначала проверьте статус через systemctl status postgresql" },
+      { "pattern": "df\\s+-h", "message": "Проверьте заполнение диска через df -h" },
+      { "pattern": "systemctl\\s+start\\s+postgresql", "message": "Стартуйте службу через systemctl start postgresql" },
+      { "pattern": "pg_isready|sync|replica(?!.*status)|wal", "message": "Проверьте синхронизацию реплики (pg_isready/pg_stat_replication)" }
+    ],
+    "hints": [
+      "Подсказка: смотрите статус ДО перезапуска.",
+      "Подсказка: диск /dev/sda заполнен на 100% — его освобождают до старта.",
+      "Подсказка: реплика проверяется командой pg_isready -h <replica>"
+    ],
+    "solutionExample": "systemctl status postgresql\ndf -h\nsystemctl start postgresql\npg_isready"
+  }
+}

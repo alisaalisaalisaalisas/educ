@@ -1,52 +1,29 @@
 import React, { useEffect, useState, useCallback, useRef } from 'react';
 import { GameBridge, InteractionEvent, PlayerState } from './game/GameBridge';
-import { gameState, GameState } from './game/state';
+import { gameState, GameState, CITY_ZONES } from './game/state';
 import { HUD } from './components/HUD';
 import { DialogueBox } from './components/DialogueBox';
 import { QuestModal } from './components/QuestModal';
 import { Journal } from './components/Journal';
 import { HelpModal } from './components/HelpModal';
 import { RecruiterModal } from './components/RecruiterModal';
+import { LibraryModal } from './components/LibraryModal';
 import { Toast, ToastMessage } from './components/Toast';
 
-import questDocker01 from './data/quests/quest-docker-01.json';
-import questLinux01 from './data/quests/quest-linux-01.json';
-import questLinux02 from './data/quests/quest-linux-02.json';
-import questK8s01 from './data/quests/quest-k8s-01.json';
-import questK8s02 from './data/quests/quest-k8s-02.json';
-import questGit01 from './data/quests/quest-git-01.json';
-import questNetwork01 from './data/quests/quest-network-01.json';
-import questObs01 from './data/quests/quest-obs-01.json';
-import questTerraform01 from './data/quests/quest-terraform-01.json';
-import questAnsible01 from './data/quests/quest-ansible-01.json';
-import questWarroom01 from './data/quests/quest-warroom-01.json';
+import { QUESTS, QuestData } from './data/quests';
+import { NPC_QUESTS } from './data/npcs';
+import { TERMINAL_ZONE_QUESTS } from './data/zones';
+import { ShopItem } from './data/merchants';
+import { MinigameDef, MINIGAMES, MINIGAME_LOCATION } from './data/minigames';
+import { SignDef, SIGNS } from './data/signs';
+import type { WarpDest } from './data/warps';
 
-const QUESTS: Record<string, any> = {
-  'quest-docker-01': questDocker01,
-  'quest-linux-01': questLinux01,
-  'quest-linux-02': questLinux02,
-  'quest-k8s-01': questK8s01,
-  'quest-k8s-02': questK8s02,
-  'quest-git-01': questGit01,
-  'quest-network-01': questNetwork01,
-  'quest-obs-01': questObs01,
-  'quest-terraform-01': questTerraform01,
-  'quest-ansible-01': questAnsible01,
-  'quest-warroom-01': questWarroom01,
-};
+import { ShopModal } from './components/ShopModal';
+import { WarpModal } from './components/WarpModal';
+import { MinigameModal } from './components/MinigameModal';
+import { SignModal } from './components/SignModal';
 
-const NPC_QUESTS: Record<string, string> = {
-  vasya: 'quest-docker-01',
-  elena: 'quest-k8s-01',
-  boris: 'quest-linux-01',
-  matvey: 'quest-git-01',
-  daria: 'quest-network-01',
-  igor: 'quest-obs-01',
-  artem: 'quest-terraform-01',
-  siren: 'quest-warroom-01',
-};
-
-type Screen = 'game' | 'dialogue' | 'quest' | 'journal' | 'help' | 'recruiter';
+type Screen = 'game' | 'dialogue' | 'quest' | 'journal' | 'help' | 'recruiter' | 'library' | 'shop' | 'warp' | 'minigame' | 'sign';
 
 export const App: React.FC = () => {
   const [state, setState] = useState<GameState>(gameState.get());
@@ -55,7 +32,10 @@ export const App: React.FC = () => {
     x: 0, y: 0, currentZone: 'linux-suburbs', nearInteractive: false,
   });
   const [activeDialogue, setActiveDialogue] = useState<any>(null);
-  const [activeQuest, setActiveQuest] = useState<any>(null);
+  const [activeQuest, setActiveQuest] = useState<QuestData | null>(null);
+  const [shopZone, setShopZone] = useState<string>('network-crossroads');
+  const [activeMinigame, setActiveMinigame] = useState<MinigameDef | null>(null);
+  const [activeSign, setActiveSign] = useState<SignDef | null>(null);
   const [toast, setToast] = useState<ToastMessage | null>(null);
   const bridgeRef = useRef<GameBridge | null>(null);
 
@@ -104,6 +84,11 @@ export const App: React.FC = () => {
     return () => bridge.destroy();
   }, []);
 
+  // Disable Phaser keyboard input when any modal/screen is open (so WASD doesn't interfere with typing)
+  useEffect(() => {
+    bridgeRef.current?.setInputEnabled(screen === 'game');
+  }, [screen]);
+
   const handleInteraction = useCallback((event: InteractionEvent) => {
     if (screen !== 'game') return;
 
@@ -120,20 +105,39 @@ export const App: React.FC = () => {
 
     if (event.type === 'terminal') {
       const terminalZone = event.data?.zone as string;
-      const zoneQuests: Record<string, string> = {
-        'linux-suburbs': 'quest-linux-01',
-        'docker-yard': 'quest-docker-01',
-        'k8s-core': 'quest-k8s-01',
-        'git-bridge': 'quest-git-01',
-        'network-crossroads': 'quest-network-01',
-        'observability-peak': 'quest-obs-01',
-        'cloud-valley': 'quest-terraform-01',
-        'incident-war-room': 'quest-warroom-01',
-      };
-      const questId = zoneQuests[terminalZone];
+      const questId = TERMINAL_ZONE_QUESTS[terminalZone];
       if (questId && QUESTS[questId]) {
         setActiveQuest(QUESTS[questId]);
         setScreen('quest');
+      }
+    }
+
+    if (event.type === 'library') {
+      setScreen('library');
+    }
+
+    if (event.type === 'shop') {
+      setShopZone((event.data?.zone as string) ?? 'network-crossroads');
+      setScreen('shop');
+    }
+
+    if (event.type === 'warp') {
+      setScreen('warp');
+    }
+
+    if (event.type === 'minigame') {
+      const mg = MINIGAMES[event.id];
+      if (mg) {
+        setActiveMinigame(mg);
+        setScreen('minigame');
+      }
+    }
+
+    if (event.type === 'sign') {
+      const sign = SIGNS[event.id];
+      if (sign) {
+        setActiveSign(sign);
+        setScreen('sign');
       }
     }
 
@@ -160,10 +164,14 @@ export const App: React.FC = () => {
   const handleQuestComplete = useCallback((questId: string, reward: any) => {
     const { newlyUnlockedZones } = gameState.completeQuest(questId, reward);
     gameState.addJournalEntry(questId);
+    const earned = gameState.syncAchievements();
 
     let unlockMessage = '';
     if (newlyUnlockedZones.length > 0) {
       unlockMessage = ` • 🔓 Открыта новая зона: ${newlyUnlockedZones.join(', ')}!`;
+    }
+    if (earned.length > 0) {
+      unlockMessage += ` • 🏅 Новое достижение: ${earned.join(', ')}!`;
     }
 
     setToast({
@@ -180,7 +188,79 @@ export const App: React.FC = () => {
     setScreen('game');
     setActiveDialogue(null);
     setActiveQuest(null);
+    setActiveMinigame(null);
+    setActiveSign(null);
   }, []);
+
+const handleBuy = useCallback((item: ShopItem) => {
+    const st = gameState.get();
+    if (st.credits < item.price) return;
+    gameState.update({ credits: st.credits - item.price });
+    let text = `🛒 Куплено: ${item.name} (-${item.price} ⚡)`;
+    if (item.effect === 'sla+1') {
+      gameState.update({ sla: Math.min(100, parseFloat((st.sla + 1).toFixed(2))) });
+      text += ' • SLA +1%!';
+    } else if (item.effect === 'unlock-random') {
+      const locked = CITY_ZONES.map(z => z.id).filter(z => !st.unlockedZones.includes(z));
+      if (locked.length > 0) {
+        const pick = locked[Math.floor(Math.random() * locked.length)];
+        gameState.unlockZone(pick);
+        text += ` • 🔓 Район открыт: ${pick}!`;
+      } else {
+        text += ' • Все районы уже открыты!';
+      }
+    } else if (item.effect === 'next-quest+20') {
+      gameState.update({ pendingQuestBonus: (st.pendingQuestBonus || 0) + 20 });
+      text += ' • +20 ⚡ к следующему квесту!';
+    } else if (item.effect === 'insure') {
+      gameState.update({ sla: Math.min(100, parseFloat((st.sla + 0.5).toFixed(2))) });
+      text += ' • SLA +0.5%!';
+    } else if (item.effect === 'perk') {
+      gameState.update({ sla: Math.min(100, parseFloat((st.sla + 0.15).toFixed(2))) });
+      text += ' • SLA +0.15%!';
+    }
+    setToast({ id: Date.now().toString(), text, type: 'success' });
+    const earned = gameState.syncAchievements();
+    if (earned.length > 0) {
+      setToast({
+        id: Date.now().toString(),
+        text: `🏅 Новое достижение: ${earned.join(', ')}!`,
+        type: 'success',
+      });
+    }
+  }, []);
+
+  const handleWarp = useCallback((dest: WarpDest) => {
+    bridgeRef.current?.teleport(dest.x, dest.y);
+    setToast({
+      id: Date.now().toString(),
+      text: `🚀 Телепорт: ${dest.name}`,
+      type: 'info',
+    });
+    setScreen('game');
+  }, []);
+
+  const handleMinigameFinish = useCallback((score: number, perfect: boolean) => {
+    if (!activeMinigame) return;
+    const reward = score * activeMinigame.rewardBase;
+    const st = gameState.get();
+    gameState.update({ credits: st.credits + reward });
+    setToast({
+      id: Date.now().toString(),
+      text: `🕹️ Перехвачено ${score}/${activeMinigame.rounds}! +${reward} ⚡${perfect ? ' • PERFECT!' : ''}`,
+      type: perfect ? 'success' : 'info',
+    });
+    const earned = gameState.syncAchievements();
+    if (earned.length > 0) {
+      setToast({
+        id: Date.now().toString(),
+        text: `🏅 Новое достижение: ${earned.join(', ')}!`,
+        type: 'success',
+      });
+    }
+    setScreen('game');
+    setActiveMinigame(null);
+  }, [activeMinigame]);
 
   const handleToggleFullscreen = useCallback(() => {
     if (!document.fullscreenElement) {
@@ -192,6 +272,8 @@ export const App: React.FC = () => {
 
   const isCurrentZoneUnlocked = gameState.isZoneUnlocked(playerState.currentZone);
   const currentObjective = gameState.getCurrentObjective();
+  const rank = gameState.getRank();
+  const nextRank = gameState.getNextRank();
 
   return (
     <div className="app">
@@ -205,6 +287,9 @@ export const App: React.FC = () => {
           isCurrentZoneUnlocked={isCurrentZoneUnlocked}
           objective={currentObjective}
           nearInteractive={playerState.nearInteractive}
+          rank={rank}
+          rankProgress={gameState.getCompletedQuestCount()}
+          nextRankQuests={nextRank?.minQuests}
           onOpenJournal={() => setScreen('journal')}
           onOpenHelp={() => setScreen('help')}
           onOpenRecruiter={() => setScreen('recruiter')}
@@ -227,6 +312,39 @@ export const App: React.FC = () => {
           />
         )}
 
+        {screen === 'shop' && (
+          <ShopModal
+            zone={shopZone}
+            credits={state.credits}
+            onBuy={handleBuy}
+            onClose={handleCloseModal}
+          />
+        )}
+
+        {screen === 'warp' && (
+          <WarpModal
+            unlockedZones={state.unlockedZones}
+            currentZone={playerState.currentZone}
+            onWarp={handleWarp}
+            onClose={handleCloseModal}
+          />
+        )}
+
+        {screen === 'minigame' && activeMinigame && (
+          <MinigameModal
+            game={activeMinigame}
+            onFinish={handleMinigameFinish}
+            onClose={handleCloseModal}
+          />
+        )}
+
+        {screen === 'sign' && activeSign && (
+          <SignModal
+            sign={activeSign}
+            onClose={handleCloseModal}
+          />
+        )}
+
         {screen === 'journal' && (
           <Journal
             gameState={state}
@@ -243,6 +361,12 @@ export const App: React.FC = () => {
         {screen === 'recruiter' && (
           <RecruiterModal
             gameState={state}
+            onClose={handleCloseModal}
+          />
+        )}
+
+        {screen === 'library' && (
+          <LibraryModal
             onClose={handleCloseModal}
           />
         )}

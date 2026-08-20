@@ -1,0 +1,41 @@
+{
+  "id": "quest-storage-01",
+  "zone": "storage-quay",
+  "title": "Бэкап без потерь",
+  "category": "Storage",
+  "difficulty": "Medium",
+  "reward": {
+    "slaBonus": 0.05,
+    "credits": 170,
+    "badge": "Data Guardian L1"
+  },
+  "npc": "svetlana",
+  "dialogue": {
+    "avatar": "svetlana",
+    "name": "Svetlana [DBA]",
+    "lines": [
+      "Наша СУБД снова на грани — диск заполнен на 98%.",
+      "Нужны чистка логов и корректный бэкап.",
+      "Настрой конфиг бэкапа и освободи место в хранилище.",
+      "Потеря данных — это не инцидент. Это катастрофа."
+    ]
+  },
+  "document": {
+    "title": "Резервное копирование БД",
+    "theory": "### Стратегия бэкапов\n\n- **full backup** — полная копия всей БД, основа восстановления\n- **incremental backup** — только изменения с последней копии\n- **wal-архивирование** — непрерывный журнал транзакций\n- Хранить копии в отдельном хранилище (off-site/object storage)\n- Проверять восстановление: бэкап, который нельзя восстановить, — не бэкап"
+  },
+  "challenge": {
+    "type": "code-fix",
+    "language": "yaml",
+    "initialCode": "# Отредактируй конфиг бэкапа: включи валидацию восстановления\n# и задай хранение FULL + INCREMENTAL с retention 14 дней\nbackup:\n  schedule: \"0 3 * * *\"\n  type: full\n  validate_restore: false\n  retention_days: 3\n  storage: dock",
+    "validation": [
+      { "pattern": "validate_restore:\\s*true", "message": "Включите validate_restore: true — восстановление нужно проверять" },
+      { "pattern": "retention_days:\\s*(1[4-9]|[2-9]\\d)", "message": "Retention должен быть не меньше 14 дней" }
+    ],
+    "hints": [
+      "Подсказка: строка validate_restore: false → true",
+      "Подсказка: retention_days: 3 — слишком мало, поставьте 14"
+    ],
+    "solutionExample": "validate_restore: true\nretention_days: 14"
+  }
+}

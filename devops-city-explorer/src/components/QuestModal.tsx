@@ -2,39 +2,7 @@ import React, { useState, useCallback } from 'react';
 import { CodeEditor } from './CodeEditor';
 import { TerminalView } from './TerminalView';
 import { CommandResult } from '../game/terminal/MockShell';
-
-interface ValidationRule {
-  pattern: string;
-  message: string;
-}
-
-interface QuestChallenge {
-  type: string;
-  language: string;
-  initialCode: string;
-  validation: ValidationRule[];
-  hints: string[];
-  solutionExample: string;
-}
-
-interface QuestReward {
-  slaBonus: number;
-  credits: number;
-  badge: string;
-}
-
-interface QuestData {
-  id: string;
-  title: string;
-  category: string;
-  difficulty: string;
-  reward: QuestReward;
-  document: {
-    title: string;
-    theory: string;
-  };
-  challenge: QuestChallenge;
-}
+import { QuestData, QuestReward } from '../data/quests';
 
 interface QuestModalProps {
   quest: QuestData;
@@ -48,21 +16,61 @@ interface ValidationResult {
 }
 
 export const QuestModal: React.FC<QuestModalProps> = ({ quest, onComplete, onClose }) => {
-  const [code, setCode] = useState(quest.challenge.initialCode);
+  const [code, setCode] = useState(quest.challenge.initialCode ?? '');
   const [executedCommands, setExecutedCommands] = useState<string[]>([]);
   const [results, setResults] = useState<ValidationResult[]>([]);
   const [showHints, setShowHints] = useState(false);
   const [hintIndex, setHintIndex] = useState(0);
   const [solved, setSolved] = useState(false);
+  const [quizAnswers, setQuizAnswers] = useState<Record<number, number>>({});
+  const [sequenceOrder, setSequenceOrder] = useState<string[]>(() => {
+    const steps = quest.challenge.sequenceSteps ?? [];
+    const shuffled = [...steps];
+    if (steps.length > 1) {
+      do {
+        for (let i = shuffled.length - 1; i > 0; i--) {
+          const j = Math.floor(Math.random() * (i + 1));
+          [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]];
+        }
+      } while (shuffled.every((s, i) => s === steps[i]));
+    }
+    return shuffled;
+  });
 
   const isTerminalQuest = quest.challenge.type === 'terminal-cli';
+  const isQuizQuest = quest.challenge.type === 'quiz';
+  const isSequenceQuest = quest.challenge.type === 'sequence';
 
   const validate = useCallback((allCommands?: string[]) => {
+    if (isQuizQuest) {
+      const questions = quest.challenge.questions ?? [];
+      const validationResults = questions.map((q, qi) => ({
+        passed: quizAnswers[qi] === q.answer,
+        message: q.question,
+      }));
+      setResults(validationResults);
+      if (validationResults.every(r => r.passed)) setSolved(true);
+      return;
+    }
+
+    if (isSequenceQuest) {
+      const steps = quest.challenge.sequenceSteps ?? [];
+      const isCorrect = sequenceOrder.length === steps.length &&
+        sequenceOrder.every((s, i) => s === steps[i]);
+      const validationResults = steps.map((step, i) => ({
+        passed: sequenceOrder[i] === step,
+        message: `Шаг ${i + 1}: ${step}`,
+      }));
+      setResults(validationResults);
+      if (isCorrect) setSolved(true);
+      return;
+    }
+
     const textToTest = isTerminalQuest
       ? (allCommands || executedCommands).join('\n')
       : code;
 
-    const validationResults = quest.challenge.validation.map((rule) => {
+    const validationResults = (quest.challenge.validation ?? []).map((rule) => {
       const regex = new RegExp(rule.pattern, 'im');
       return {
         passed: regex.test(textToTest),
@@ -74,7 +82,17 @@ export const QuestModal: React.FC<QuestModalProps> = ({ quest, onComplete, onClo
     if (validationResults.every(r => r.passed)) {
       setSolved(true);
     }
-  }, [code, executedCommands, isTerminalQuest, quest.challenge.validation]);
+  }, [code, executedCommands, isQuizQuest, isSequenceQuest, isTerminalQuest, quizAnswers, quest.challenge, sequenceOrder]);
+
+  const moveStep = (index: number, direction: -1 | 1) => {
+    setSequenceOrder(prev => {
+      const next = [...prev];
+      const target = index + direction;
+      if (target < 0 || target >= next.length) return prev;
+      [next[index], next[target]] = [next[target], next[index]];
+      return next;
+    });
+  };
 
   const handleCommandExecuted = useCallback((cmd: string, _res: CommandResult) => {
     if (cmd.trim()) {
@@ -155,7 +173,47 @@ export const QuestModal: React.FC<QuestModalProps> = ({ quest, onComplete, onClo
                 {renderListItems(quest.document.theory)}
               </div>
 
-              {isTerminalQuest ? (
+              {isQuizQuest ? (
+                <div className="quest-quiz">
+                  {(quest.challenge.questions ?? []).map((q, qi) => (
+                    <div key={qi} className="quest-quiz__item">
+                      <div className="quest-quiz__question">
+                        {qi + 1}. {q.question}
+                      </div>
+                      <div className="quest-quiz__options">
+                        {q.options.map((opt, oi) => (
+                          <button
+                            key={oi}
+                            className={`quest-quiz__option ${quizAnswers[qi] === oi ? 'quest-quiz__option--selected' : ''}`}
+                            onClick={() => setQuizAnswers(prev => ({ ...prev, [qi]: oi }))}
+                          >
+                            {String.fromCharCode(65 + oi)}) {opt}
+                          </button>
+                        ))}
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              ) : isSequenceQuest ? (
+                <div className="quest-sequence">
+                  <div className="quest-editor__label">
+                    Расставь этапы в правильном порядке
+                    <span className="quest-editor__language">{quest.challenge.language ?? 'pipeline'}</span>
+                  </div>
+                  <ol className="quest-sequence__list">
+                    {sequenceOrder.map((step, i) => (
+                      <li key={`${step}-${i}`} className="quest-sequence__item">
+                        <span className="quest-sequence__index">{i + 1}</span>
+                        <span className="quest-sequence__step">{step}</span>
+                        <span className="quest-sequence__controls">
+                          <button onClick={() => moveStep(i, -1)} disabled={i === 0} title="Выше">▲</button>
+                          <button onClick={() => moveStep(i, 1)} disabled={i === sequenceOrder.length - 1} title="Ниже">▼</button>
+                        </span>
+                      </li>
+                    ))}
+                  </ol>
+                </div>
+              ) : isTerminalQuest ? (
                 <div className="quest-terminal-wrapper">
                   <div className="quest-editor__label">
                     Интерактивная консоль восстановления

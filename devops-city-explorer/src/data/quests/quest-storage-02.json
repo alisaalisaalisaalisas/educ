@@ -1,0 +1,44 @@
+{
+  "id": "quest-storage-02",
+  "zone": "storage-quay",
+  "title": "Миграция данных без простоя",
+  "category": "Storage",
+  "difficulty": "Hard",
+  "reward": {
+    "slaBonus": 0.06,
+    "credits": 220,
+    "badge": "Migration Master L1"
+  },
+  "npc": "nikita",
+  "dialogue": {
+    "avatar": "nikita",
+    "name": "Nikita [DBA]",
+    "lines": [
+      "Миграция БД провалилась на середине, прод всё ещё работает.",
+      "Но если я откачу неверно — потеряю транзакции.",
+      "Расставь этапы миграции в правильном порядке.",
+      "Только никакого простоя (zero-downtime)!"
+    ]
+  },
+  "document": {
+    "title": "Zero-Downtime миграции",
+    "theory": "### Этапы безопасной миграции\n\n- **snapshot** — полный снапшот перед изменениями\n- **replica** — развернуть реплику для проверки\n- **schema migrate** — применить миграции схемы на реплике\n- **validate** — проверить целостность данных на реплике\n- **switchover** — переключить трафик на новую версию\n- **rollback plan** — план отката, подтверждённый заранее"
+  },
+  "challenge": {
+    "type": "sequence",
+    "hints": [
+      "Снапшот делается ДО любых изменений схемы.",
+      "Сначала реплика, потом переключение трафика (switchover).",
+      "План отката готовится заранее, но применяется в низах списка."
+    ],
+    "sequenceSteps": [
+      "snapshot",
+      "replica",
+      "schema migrate",
+      "validate",
+      "switchover",
+      "rollback plan"
+    ],
+    "solutionExample": "snapshot → replica → schema migrate → validate → switchover → rollback plan"
+  }
+}

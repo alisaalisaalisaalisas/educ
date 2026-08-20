@@ -267,7 +267,89 @@ export class BootScene extends Phaser.Scene {
     graphics.fillStyle(0xef4444, 0.8);
     graphics.fillRect(268, 13, 8, 6);
 
-    graphics.generateTexture('tileset', 288, 32);
+    // ==========================================
+    // 9: Security Vault Wall (Obstacle) — SecOps Bastion / Storage Quay
+    // ==========================================
+    graphics.fillStyle(0x0b1020, 1);
+    graphics.fillRect(288, 0, 32, 32);
+    graphics.fillStyle(0x111a2e, 1);
+    graphics.fillRect(289, 1, 30, 30);
+    graphics.lineStyle(1, 0x38bdf8, 0.9);
+    graphics.strokeRect(289, 1, 30, 30);
+    // Vault door with hazard stripes
+    graphics.fillStyle(0x1e3a5f, 1);
+    graphics.fillRect(296, 6, 16, 20);
+    graphics.fillStyle(0x0e7490, 1);
+    graphics.fillRect(298, 8, 12, 4);
+    graphics.fillRect(298, 20, 12, 4);
+    // Diagonal hazard stripes
+    graphics.fillStyle(0xf59e0b, 1);
+    graphics.fillRect(295, 27, 5, 2);
+    graphics.fillRect(305, 29, 5, 2);
+    graphics.fillRect(314, 27, 6, 3);
+
+    // ==========================================
+    // 10: Cable Duct Floor (Walkable) — tech walkways
+    // ==========================================
+    graphics.fillStyle(0x131c2e, 1);
+    graphics.fillRect(320, 0, 32, 32);
+    // Neon grid
+    graphics.lineStyle(1, 0x1d4ed8, 0.5);
+    graphics.lineBetween(320, 16, 352, 16);
+    graphics.lineBetween(336, 0, 336, 32);
+    // Running cables
+    graphics.fillStyle(0x22d3ee, 0.9);
+    graphics.fillRect(326, 8, 20, 2);
+    graphics.fillStyle(0x4ade80, 0.8);
+    graphics.fillRect(326, 22, 20, 2);
+    graphics.fillStyle(0xfbbf24, 0.8);
+    graphics.fillRect(332, 15, 2, 2);
+
+    // ==========================================
+    // 11: Gear Machinery Block (Obstacle) — Edge Refinery / Pipeline Plaza
+    // ==========================================
+    graphics.fillStyle(0x111827, 1);
+    graphics.fillRect(352, 0, 32, 32);
+    graphics.fillStyle(0x334155, 1);
+    graphics.fillCircle(368, 16, 9);
+    graphics.fillStyle(0x1e293b, 1);
+    graphics.fillCircle(368, 16, 5);
+    graphics.fillStyle(0xf59e0b, 1);
+    graphics.fillCircle(368, 16, 2);
+    // Gear teeth
+    graphics.fillStyle(0x475569, 1);
+    graphics.fillRect(365, 4, 6, 4);
+    graphics.fillRect(365, 24, 6, 4);
+    graphics.fillRect(356, 13, 4, 6);
+    graphics.fillRect(376, 13, 4, 6);
+
+    // ==========================================
+    // 12: Pipeline Floor (Walkable) — industrial passages
+    // ==========================================
+    graphics.fillStyle(0x1b2437, 1);
+    graphics.fillRect(384, 0, 32, 32);
+    // Horizontal pipe with flanges
+    graphics.fillStyle(0x475569, 1);
+    graphics.fillRect(385, 8, 30, 10);
+    graphics.fillStyle(0x64748b, 1);
+    graphics.fillRect(385, 10, 30, 6);
+    graphics.fillStyle(0x94a3b8, 1);
+    graphics.fillRect(385, 11, 30, 2);
+    // Flange rings + bolts
+    graphics.fillStyle(0x1f2937, 1);
+    graphics.fillRect(388, 5, 6, 16);
+    graphics.fillRect(406, 5, 6, 16);
+    graphics.fillStyle(0xf59e0b, 0.9);
+    graphics.fillRect(390, 7, 2, 2);
+    graphics.fillRect(390, 17, 2, 2);
+    graphics.fillRect(408, 7, 2, 2);
+    graphics.fillRect(408, 17, 2, 2);
+    // Drainage slots
+    graphics.fillStyle(0x0e1626, 1);
+    graphics.fillRect(396, 25, 3, 4);
+    graphics.fillRect(403, 25, 3, 4);
+
+    graphics.generateTexture('tileset', 416, 32);
 
     // Dedicated terminal icon
     const termIcon = this.make.graphics({ x: 0, y: 0, add: false } as any);
@@ -286,6 +368,84 @@ export class BootScene extends Phaser.Scene {
     termIcon.fillRect(12, 22, 8, 4);
     termIcon.fillRect(8, 26, 16, 2);
     termIcon.generateTexture('term-icon', 32, 32);
+
+    // Library building (Knowledge Base point of interest)
+    const libGfx = this.make.graphics({ x: 0, y: 0, add: false } as any);
+    libGfx.fillStyle(0x312e81, 1);
+    libGfx.fillRoundedRect(2, 8, 28, 22, 3);
+    libGfx.lineStyle(2, 0xfbbf24, 1);
+    libGfx.strokeRoundedRect(2, 8, 28, 22, 3);
+    libGfx.fillStyle(0x4338ca, 1);
+    libGfx.fillRoundedRect(4, 10, 24, 18, 2);
+    libGfx.fillStyle(0xfbbf24, 1);
+    libGfx.fillRect(14, 3, 4, 7);
+    libGfx.fillStyle(0xfde68a, 1);
+    libGfx.fillRect(5, 12, 9, 6);
+    libGfx.fillRect(18, 12, 9, 6);
+    libGfx.fillRect(5, 20, 9, 6);
+    libGfx.fillRect(18, 20, 9, 6);
+    libGfx.fillStyle(0x312e81, 1);
+    libGfx.fillRect(13, 25, 6, 5);
+    libGfx.generateTexture('lib-icon', 32, 32);
+
+    // Shop (trading kiosk)
+    const shopGfx = this.make.graphics({ x: 0, y: 0, add: false } as any);
+    shopGfx.fillStyle(0x1e293b, 1);
+    shopGfx.fillRoundedRect(4, 4, 24, 24, 4);
+    shopGfx.lineStyle(2, 0xfbbf24, 1);
+    shopGfx.strokeRoundedRect(4, 4, 24, 24, 4);
+    shopGfx.fillStyle(0xfbbf24, 1);
+    shopGfx.fillRoundedRect(8, 8, 16, 12, 2);
+    shopGfx.fillStyle(0x0f172a, 1);
+    shopGfx.fillRect(10, 10, 12, 8);
+    shopGfx.fillStyle(0x4ade80, 1);
+    shopGfx.fillRect(12, 22, 4, 4);
+    shopGfx.fillRect(20, 22, 4, 4);
+    shopGfx.generateTexture('shop-icon', 32, 32);
+
+    // Warp station (teleport hub)
+    const warpGfx = this.make.graphics({ x: 0, y: 0, add: false } as any);
+    warpGfx.fillStyle(0x0f172a, 0.95);
+    warpGfx.fillRoundedRect(2, 2, 28, 28, 14);
+    warpGfx.lineStyle(2, 0x22d3ee, 1);
+    warpGfx.strokeRoundedRect(2, 2, 28, 28, 14);
+    warpGfx.fillStyle(0x22d3ee, 1);
+    warpGfx.fillCircle(9, 9, 3);
+    warpGfx.fillCircle(23, 9, 3);
+    warpGfx.fillCircle(9, 23, 3);
+    warpGfx.fillCircle(23, 23, 3);
+    warpGfx.fillStyle(0xffffff, 1);
+    warpGfx.fillCircle(16, 16, 5);
+    warpGfx.generateTexture('warp-icon', 32, 32);
+
+    // Arcade kiosk (minigame)
+    const arcadeGfx = this.make.graphics({ x: 0, y: 0, add: false } as any);
+    arcadeGfx.fillStyle(0x1e293b, 1);
+    arcadeGfx.fillRect(4, 6, 24, 22);
+    arcadeGfx.fillStyle(0x0f172a, 1);
+    arcadeGfx.fillRect(6, 8, 20, 14);
+    arcadeGfx.fillStyle(0xf472b6, 1);
+    arcadeGfx.fillRect(8, 10, 3, 3);
+    arcadeGfx.fillRect(15, 18, 3, 3);
+    arcadeGfx.fillRect(21, 10, 3, 3);
+    arcadeGfx.fillStyle(0x64748b, 1);
+    arcadeGfx.fillRect(6, 24, 20, 3);
+    arcadeGfx.fillRect(10, 28, 12, 3);
+    arcadeGfx.generateTexture('arcade-icon', 32, 32);
+
+    // Info sign
+    const signGfx = this.make.graphics({ x: 0, y: 0, add: false } as any);
+    signGfx.fillStyle(0x0f172a, 0.95);
+    signGfx.fillRoundedRect(4, 2, 24, 26, 3);
+    signGfx.lineStyle(2, 0x38bdf8, 1);
+    signGfx.strokeRoundedRect(4, 2, 24, 26, 3);
+    signGfx.fillStyle(0x38bdf8, 1);
+    signGfx.fillRect(14, 5, 4, 18);
+    signGfx.fillRect(8, 8, 10, 2);
+    signGfx.fillRect(8, 12, 16, 2);
+    signGfx.fillRect(8, 16, 8, 2);
+    signGfx.fillRect(8, 20, 14, 2);
+    signGfx.generateTexture('sign-icon', 32, 32);
   }
 
   private createGateSprites() {

@@ -1,12 +1,15 @@
 import React, { useState } from 'react';
-import { GameState, CITY_ZONES } from '../game/state';
+import { GameState, CITY_ZONES, gameState as stateManager } from '../game/state';
+import { QUESTS } from '../data/quests';
+import { ZONE_LABELS } from '../data/zones';
+import { ACHIEVEMENTS } from '../data/achievements';
 
 interface JournalProps {
   gameState: GameState;
   onClose: () => void;
 }
 
-type TabType = 'quests' | 'zones' | 'badges';
+type TabType = 'quests' | 'zones' | 'badges' | 'awards';
 
 const STATUS_ICONS: Record<string, string> = {
   completed: '✓',
@@ -15,16 +18,12 @@ const STATUS_ICONS: Record<string, string> = {
   locked: '🔒',
 };
 
-const QUEST_TITLES: Record<string, string> = {
-  'quest-linux-01': 'Найди утечку ресурсов',
-  'quest-docker-01': 'Оптимизация гигантского Dockerfile',
-  'quest-k8s-01': 'CrashLoopBackOff: Расследование',
-};
+const questTitle = (questId: string) => QUESTS[questId]?.title ?? questId;
 
-const QUEST_ZONES: Record<string, string> = {
-  'quest-linux-01': '🐧 Linux Suburbs',
-  'quest-docker-01': '🐳 Docker Yard',
-  'quest-k8s-01': '☸️ K8s Core District',
+const questZone = (questId: string) => {
+  const quest = QUESTS[questId];
+  if (!quest) return 'Unknown Zone';
+  return ZONE_LABELS[quest.zone] ?? quest.zone;
 };
 
 export const Journal: React.FC<JournalProps> = ({ gameState, onClose }) => {
@@ -33,6 +32,8 @@ export const Journal: React.FC<JournalProps> = ({ gameState, onClose }) => {
   const quests = Object.values(gameState.questProgress);
   const completedCount = quests.filter(q => q.status === 'completed').length;
   const unlockedZonesCount = gameState.unlockedZones.length;
+  const rank = stateManager.getRank();
+  const nextRank = stateManager.getNextRank();
 
   return (
     <div className="journal-overlay" onClick={onClose}>
@@ -64,6 +65,12 @@ export const Journal: React.FC<JournalProps> = ({ gameState, onClose }) => {
             >
               Бейджи ({gameState.badges.length})
             </button>
+            <button
+              className={`journal__tab ${tab === 'awards' ? 'journal__tab--active' : ''}`}
+              onClick={() => setTab('awards')}
+            >
+              Достижения ({gameState.achievements.length}/{ACHIEVEMENTS.length})
+            </button>
           </div>
 
           {/* Quests Tab */}
@@ -76,10 +83,10 @@ export const Journal: React.FC<JournalProps> = ({ gameState, onClose }) => {
                   </div>
                   <div className="journal__quest-info">
                     <div className="journal__quest-title">
-                      {QUEST_TITLES[q.questId] || q.questId}
+                      {questTitle(q.questId)}
                     </div>
                     <div className="journal__quest-zone">
-                      {QUEST_ZONES[q.questId] || 'Unknown Zone'}
+                      {questZone(q.questId)}
                       {q.status === 'completed' && ' • ✓ Выполнено'}
                       {q.status === 'locked' && ' • 🔒 Требуется открыть зону'}
                     </div>
@@ -137,6 +144,46 @@ export const Journal: React.FC<JournalProps> = ({ gameState, onClose }) => {
                 Завершайте квесты у NPC, чтобы получить награды и открыть закрытые районы города!
               </div>
             )
+          )}
+
+          {/* Awards (Rank + Achievements) Tab */}
+          {tab === 'awards' && (
+            <div className="journal__awards">
+              <div className="journal__rank">
+                <div className="journal__rank-header">
+                  <span className="journal__rank-icon">{rank.icon}</span>
+                  <div>
+                    <div className="journal__rank-name">{rank.name}</div>
+                    <div className="journal__rank-desc">{rank.desc}</div>
+                  </div>
+                </div>
+                {nextRank ? (
+                  <div className="journal__rank-next">
+                    Следующий ранг: {nextRank.icon} {nextRank.name} — нужно {nextRank.minQuests} квестов (сейчас {completedCount})
+                  </div>
+                ) : (
+                  <div className="journal__rank-next">🏆 Вы достигли максимального ранга!</div>
+                )}
+              </div>
+
+              <div className="journal__achievement-list">
+                {ACHIEVEMENTS.map(a => {
+                  const earned = gameState.achievements.includes(a.id);
+                  return (
+                    <div key={a.id} className={`journal__achievement ${earned ? 'journal__achievement--earned' : ''}`}>
+                      <div className="journal__achievement-icon">{a.icon}</div>
+                      <div className="journal__achievement-info">
+                        <div className="journal__achievement-name">{a.name}</div>
+                        <div className="journal__achievement-desc">{a.desc}</div>
+                      </div>
+                      <div className="journal__achievement-status">
+                        {earned ? '✓' : '🔒'}
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+            </div>
           )}
         </div>
       </div>

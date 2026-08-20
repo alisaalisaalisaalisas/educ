@@ -1,10 +1,10 @@
 import Phaser from 'phaser';
-import { BootScene } from './scenes/BootScene';
-import { CityScene } from './scenes/CityScene';
 
 export const GAME_WIDTH = 960;
 export const GAME_HEIGHT = 640;
 export const TILE_SIZE = 32;
+export const MAP_WIDTH_TILES = 64;
+export const MAP_HEIGHT_TILES = 36;
 
 export const gameConfig: Phaser.Types.Core.GameConfig = {
   type: Phaser.AUTO,
@@ -25,6 +25,5 @@ export const gameConfig: Phaser.Types.Core.GameConfig = {
       debug: false,
     },
   },
-  scene: [BootScene, CityScene],
   backgroundColor: '#0a0e1a',
 };

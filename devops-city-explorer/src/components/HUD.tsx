@@ -1,5 +1,7 @@
 import React from 'react';
 import { CITY_ZONES } from '../game/state';
+import { ZONE_LABELS } from '../data/zones';
+import { RankDef } from '../data/ranks';
 
 interface HUDProps {
   sla: number;
@@ -8,22 +10,14 @@ interface HUDProps {
   isCurrentZoneUnlocked: boolean;
   objective: string;
   nearInteractive: boolean;
+  rank: RankDef;
+  rankProgress: number;
+  nextRankQuests?: number;
   onOpenJournal: () => void;
   onOpenHelp: () => void;
   onOpenRecruiter: () => void;
   onToggleFullscreen: () => void;
 }
-
-const ZONE_LABELS: Record<string, string> = {
-  'linux-suburbs': '🐧 Linux Suburbs',
-  'network-crossroads': '🌐 Network Crossroads',
-  'git-bridge': '🌉 Git Bridge & CI/CD',
-  'docker-yard': '🐳 Docker Yard',
-  'k8s-core': '☸️ K8s Core District',
-  'observability-peak': '📊 Observability Peak',
-  'cloud-valley': '☁️ Cloud Valley',
-  'incident-war-room': '🚨 Incident War Room',
-};
 
 export const HUD: React.FC<HUDProps> = ({
   sla,
@@ -32,6 +26,9 @@ export const HUD: React.FC<HUDProps> = ({
   isCurrentZoneUnlocked,
   objective,
   nearInteractive,
+  rank,
+  rankProgress,
+  nextRankQuests,
   onOpenJournal,
   onOpenHelp,
   onOpenRecruiter,
@@ -63,6 +60,17 @@ export const HUD: React.FC<HUDProps> = ({
           <div className="credits-display" title="Compute Credits: начисляются за выполненные квесты">
             <span className="credits-display__icon">⚡</span>
             <span className="credits-display__value">{credits}</span>
+          </div>
+
+          <div
+            className="rank-chip"
+            title={`Ваш ранг: ${rank.name}. ${nextRankQuests !== undefined ? `До следующего ранга — ещё ${Math.max(0, nextRankQuests - rankProgress)} квестов.` : 'Вы достигли максимального ранга!'}`}
+          >
+            <span className="rank-chip__icon">{rank.icon}</span>
+            <span className="rank-chip__name">{rank.name}</span>
+            {nextRankQuests !== undefined && (
+              <span className="rank-chip__progress">{Math.min(rankProgress, nextRankQuests)}/{nextRankQuests}</span>
+            )}
           </div>
 
           <div className="zone-indicator" title={zoneInfo?.description || currentZone}>
